@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAE FGV Coffee</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="/index.html">
+            <h1><small>ZAE FGV Coffee</small></h1>
+        </a>
+    </nav>
+    <div class="container mb-4">
+        <div class="col">
+            <h1 class="text-center">Requisitos e Casos de Uso</h1>
+
+            <h2>Introdução</h2>
+            <p>Esse documento tem como objetivo</p>
+
+            <h2>Estória de Usuários</h2>
+
+            <ul>
+                <li>
+                    <strong>Estória 1:</strong> Como vendedor, quero ser capaz de atualizar o estoque de um produto para que esteja sempre condizente com o que está na <i>vending machine</i>
+                </li>
+                <li>
+                    <strong>Estória 2:</strong>
+                    Como um cliente, quero poder conferir as informações nutricionais dos produtos para assegurar que posso comer aquele alimento.
+                </li>
+                <li>
+                    <strong>Estória 3:</strong>
+                    Como suporte quero quero ter acesso aos relatórios <i>on demand</i> para análise das estatísticas.
+                </li>
+            </ul>
+
+            <h2>Casos de Uso</h2>
+            <ul>
+                <li><strong>Caso de Uso 1:</strong></li>
+                
+                <p class="mb-0"><strong>Ator:</strong> Vendedor</p>
+                
+                <p class="mb-0"><strong>Descrição:</strong> O vendedor navega pelo aplicativo, acessa o estoque, seleciona o produto a ser modificado, atualiza as informações e confirma as alterações.</p>
+                
+                <p class="mb-0"><strong>Fluxo Principal:</strong></p>
+                <ul>
+                     <li>O vendedor realiza o login.</li>
+                     <li>O vendedor acessa a página de estoque.</li>
+                     <li>O vendedor seleciona o produto.</li>
+                     <li>O vendedor atualiza as informações.</li>
+                     <li>O vendedor confirma as alterações.</li>
+                     <li>O sistema atualiza os dados.</li>
+                </ul>
+                
+                <li class="mt-4"><strong>Caso de Uso 2:</strong></li>
+
+                <p class="mb-0"><strong>Ator:</strong> Cliente</p>
+                
+                <p class="mb-0"><strong>Descrição:</strong> O cliente navega pelo aplicativo, acessa a página da máquina, seleciona o produto a ser comprado e visualiza as informações.</p>
+                
+                <p class="mb-0"><strong>Fluxo Principal:</strong></p>
+                <ul>
+                     <li>O cliente realiza o login.</li>
+                     <li>O cliente acessa a página da máquina.</li>
+                     <li>O cliente seleciona o produto.</li>
+                     <li>O cliente visualiza as informações.</li>
+                </ul>
+
+                <li class="mt-4"><strong>Caso de Uso 3:</strong></li>
+                
+                <p class="mb-0"><strong>Ator:</strong> Suporte</p>
+                
+                <p class="mb-0"><strong>Descrição:</strong> O suporte navega pelo site, acessa a página de relatórios, seleciona o relatório a ser visualizado, acessa a página do dashboard do relatório.</p>
+                
+                <p class="mb-0"><strong>Fluxo Principal:</strong></p>
+                <ul>
+                     <li>O suporte acessa o site.</li>
+                     <li>O suporte acessa a página da relatórios.</li>
+                     <li>O suporte seleciona o relatório.</li>
+                     <li>O suporte visualiza as informações no dashboard.</li>
+                </ul>
+            </ul>
+
+            <h2>Requisitos Funcionais</h2>
+
+            <ul>
+                <li><strong>RF01- Reportar problemas:</strong> O sistema deve reportar o departamento responsável sempre que houver um problema com as máquinas.</li>
+
+                <li><strong>RF02 - Formas de Pagamento:</strong> O aplicativo deve aceitar Crédito, Débito e Pix como forma de pagamento.</li>
+            
+                <li><strong>RF03 - Validação de Produtos:</strong> Para que um produto possa ser adicionado, este precisa ser previamente validado pelo suporte.</li>
+            
+                <li><strong>RF04 - Controle de Estoque:</strong> O sistema deve exibir o estoque atual de todas as \textit{vending machines} não permitindo a venda de produtos esgotados.</li>
+            
+                <li><strong>RF05 - Inserção de Produtos:</strong> Os usuários vendedores devem ser capazes de de inserir novos produtos na plataforma.</li>
+
+                <li><strong>RF06 - Login de Usuários:</strong> Os usuários devem ser capazes de escolher logar como consumidor ou vendedor.</li>
+            
+                <li><strong>RF07 - Canal de comunicação com o suporte:</strong> O usuário deve ser capaz de se comunicar diretamente com a equipe de suporte.</li>
+
+                <li><strong>RF08 - Acesso do Suporte:</strong> Os usuários do suporte devem ser capazes de acessar a página de métricas e comunicação com seus usuários.</li>
+            
+                <li><strong>RF09 - Canal de melhoria do produto:</strong> O usuário deve ser capaz de requisitar melhorias nos produtos.</li>
+
+                <li><strong>RF10 - Informações dos Produtos:</strong> Todo produto deve conter uma descrição e os ingredientes que o compõe.</li>
+            
+                <li><strong>RF11 - Edição de Produto:</strong> O vendedor deve ser capaz de editar um produto. </li>
+            
+                <li><strong>RF12 - Estado de Funcionamento:</strong> O sistema deve exibir para o usuário o estado de funcionamento das máquinas. </li>
+            
+                <li><strong>RF13 - Quantidade de Produtos:</strong> O sistema deve notificar o vendedor quando o estoque estiver baixo.</li>
+
+                <li><strong>RF14 - Publicação de Pedido:</strong> Um usuário deve ser capaz de publicar um pedido público ou apenas para amigos.</li>
+
+                <li><strong>RF15 - Visualização de Pedido:</strong> Um usuário deve ser capaz de visualizar os pedidos públicos ou apenas de amigos.</li>
+
+                <li><strong>RF16 - Aceitação de Pedido:</strong> Um usuário deve ser capaz de aceitar um pedido público ou privado. </li>
+
+                <li><strong>RF17 - Histórico de Pedidos:</strong> O usuário deve ter acesso ao histórico de pedidos. </li>
+            
+                <li><strong>RF18 - Personalização do Perfil:</strong> O usuário deve ser capaz de personalizar o perfil.</li>
+
+                <li><strong>RF19 - Adição de Amigos:</strong> Um usuário deve ser capaz de adicionar amigos.</li>
+
+                <li><strong>RF20 - Remoção de Amigos:</strong> Um usuário deve ser capaz de remover amigos.</li>
+
+                <li><strong>RF21 - Avaliação de Produtos:</strong> Todo produto deve ser avaliado de 1 a 5 estrelas.</li>
+            
+                <li><strong>RF22 - Relatórios:</strong> O sistema deve ser capaz de gerar relatórios de uso, avaliação, estoque, consumo e outros dados.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
