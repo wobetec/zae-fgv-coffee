@@ -2,13 +2,14 @@
 Django settings for backend project.
 """
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.109']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv("DJANGO_HOST")]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
