@@ -5,8 +5,12 @@ import 'pages/signup_page.dart';
 import 'pages/login_page.dart';
 import 'pages/user_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path/path.dart' as path;
 
-void main() {
+
+Future<void> main() async {
+  await dotenv.load(fileName: path.join('.env'));
   runApp(MyApp());
 }
 
@@ -21,7 +25,7 @@ class MyApp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {  
     return MaterialApp(
       title: 'App de Cadastro',
       theme: ThemeData(

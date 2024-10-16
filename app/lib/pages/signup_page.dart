@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../config.dart'; // Arquivo de configuração com a BASE_URL
+import '../config.dart'; // Arquivo de configuração com a baseUrl
 import 'package:shared_preferences/shared_preferences.dart';
 import 'user_page.dart'; // Importamos a UserPage para navegar após o cadastro
 import 'package:connectivity_plus/connectivity_plus.dart'; // Para verificar conectividade
@@ -71,7 +71,7 @@ class _SignupPageState extends State<SignupPage> {
 
       final response = await http
           .post(
-            Uri.parse('${Config.BASE_URL}/signup'),
+            Uri.parse('${Config.baseUrl}/signup'),
             headers: {'Content-Type': 'application/json'},
             body: json.encode(data),
           )
