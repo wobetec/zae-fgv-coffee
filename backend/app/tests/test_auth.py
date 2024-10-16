@@ -61,6 +61,28 @@ class TestLogin(APITestCase):
         self.assertEqual(response.data["error"], "Missing password")
 
 
+class TestLogout(APITestCase):
+    
+    def setUp(self):
+        self.url = reverse("app:logout")
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpassword",
+            email="testuser@email.com"
+        )
+        self.token = Token.objects.create(user=self.user)
+    
+    def test_logout(self):
+        response = self.client.get(reverse("app:test_token"), HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(self.url, HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.get(reverse("app:test_token"), HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
 class TestSignUp(APITestCase):
 
     def setUp(self):

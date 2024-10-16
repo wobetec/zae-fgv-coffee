@@ -50,6 +50,26 @@ def login(request):
 
 
 @api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    """
+    This view logs out a user by deleting their token
+
+    response format:
+        {
+            "success": "Successfully logged out"
+        }
+    """
+    try:
+        token = Token.objects.get(user=request.user)
+        token.delete()
+        return Response({"success": "Successfully logged out"}, status=status.HTTP_200_OK)
+    except Token.DoesNotExist:
+        return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
 @authentication_classes([])
 @permission_classes([])
 def signup(request):
