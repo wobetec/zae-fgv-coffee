@@ -1,44 +1,101 @@
+// lib/pages/user_page.dart
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config.dart'; // Importa a configuração com a BASE_URL
 
 class UserPage extends StatefulWidget {
   @override
-  _UserPageState createState() => _UserPageState();
+  State<UserPage> createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
-  @override
-  void initState() {
-    super.initState();
-    _scheduleNotification();
+  String _username = '';
+  bool _isLoading = true; // Indicador de carregamento
+
+  // Método para buscar os dados do usuário
+  Future<void> _fetchUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('authToken');
+
+    if (token == null) {
+      // Token não encontrado, redireciona para o login após o frame atual
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, '/login');
+      });
+      return;
+    }
+
+    try {
+      // Envia a requisição GET para verificar o token
+      final response = await http.get(
+        Uri.parse('${Config.BASE_URL}/test_token'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var responseData = json.decode(response.body);
+        setState(() {
+          _username = responseData['username'] ?? 'Usuário';
+          _isLoading = false; // Oculta o indicador de carregamento
+        });
+      } else {
+        // Token inválido ou expirado
+        setState(() {
+          _isLoading = false; // Oculta o indicador de carregamento
+        });
+        _showDialog('Erro', 'Sessão expirada. Faça login novamente.', onOk: () {
+          _logout();
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false; // Oculta o indicador de carregamento
+      });
+      _showDialog('Erro', 'Ocorreu um erro. Tente novamente.');
+    }
   }
 
-  // Simula a chegada da notificação após 10 segundos
-  void _scheduleNotification() {
-    Future.delayed(Duration(seconds: 10), () {
-      _showNotification();
+  // Método para realizar o logout
+  void _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('authToken');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacementNamed(context, '/login');
     });
   }
 
-  // Exibe a notificação como um AlertDialog
-  void _showNotification() {
+  // Método para exibir diálogos de erro ou mensagem
+  void _showDialog(String title, String message, {VoidCallback? onOk}) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Notificação de Produto Esgotado"),
-          content: Text(
-              "O produto Café Expresso está esgotado na vending machine VM-123!"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Fecha o pop-up
-              },
-              child: Text("Fechar"),
-            ),
-          ],
-        );
-      },
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (onOk != null) {
+                onOk();
+              }
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData(); // Busca os dados do usuário ao iniciar a página
   }
 
   @override
@@ -46,13 +103,20 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Página do Usuário'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout, // Botão de logout
+          ),
+        ],
       ),
       body: Center(
-        child: Text(
-          'Esta é a página genérica de Usuário.\nNotificacao em 10 segundos.',
-          style: TextStyle(fontSize: 20),
-          textAlign: TextAlign.center,
-        ),
+        child: _isLoading
+            ? CircularProgressIndicator() // Exibe indicador de carregamento
+            : Text(
+                'Bem-vindo, $_username!',
+                style: TextStyle(fontSize: 24),
+              ),
       ),
     );
   }
