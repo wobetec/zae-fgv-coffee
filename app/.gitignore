@@ -1,0 +1,54 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+android/app/debug.keystore
+
+# Web related
+web/.dart_tool/
+web/build/
+
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.generated/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.podspec
+
+# Android related
+android/.gradle/
+android/app/build/
+
+# VS Code
+.vscode/
+.idea/
+*.iml
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Flutter/Flutter.podspec
+macos/Pods/
+macos/.symlinks/
+
+# Linux
+linux/flutter/ephemeral/
+
+# Windows
+windows/flutter/ephemeral/
+
+# Flutter Sentry settings
+.sentryclirc
+
+# Temporary files
+*.tmp
+*.temp
+
+/env
+
+# Tokens
+google-services.json
