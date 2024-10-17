@@ -29,7 +29,7 @@ class _UserPageState extends State<UserPage> {
     try {
       // Envia a requisição GET para verificar o token
       final response = await http.get(
-        Uri.parse('${Config.baseUrl}/test_token'),
+        Uri.parse('${Config.baseUrl}/auth/test_token'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Token $token',

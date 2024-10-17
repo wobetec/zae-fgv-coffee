@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       // Enviando a requisição POST para o endpoint de login
       final response = await http.post(
-        Uri.parse('${Config.baseUrl}/login'),
+        Uri.parse('${Config.baseUrl}/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(data),
       );

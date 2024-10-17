@@ -49,3 +49,6 @@ windows/flutter/ephemeral/
 *.temp
 
 /env
+
+# Tokens
+google-services.json
