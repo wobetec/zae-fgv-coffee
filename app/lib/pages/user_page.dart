@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart'; // Importa a configuração com a baseUrl
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:android_id/android_id.dart';
 
 class UserPage extends StatefulWidget {
   @override
@@ -12,11 +14,30 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   String _username = '';
   bool _isLoading = true; // Indicador de carregamento
+  String? _fcmToken;
 
   // Método para buscar os dados do usuário
   Future<void> _fetchUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('authToken');
+    String? fcmToken = await FirebaseMessaging.instance.getToken(vapidKey: Config.vapidKey);
+    setState(() {
+      _fcmToken = fcmToken;
+      print('Token FCM: $_fcmToken');
+    });
+
+    const androidIdPlugin = AndroidId();
+    final String? androidId = await androidIdPlugin.getId();
+
+    final responseRegister = await http.post(
+      Uri.parse('${Config.baseUrl}/notification/register_device'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Token $token',
+      },
+      body: json.encode({'device_id': androidId, 'registration_id': fcmToken, 'type': 'android'}),
+    );
+    print('ResponseRegister Body: ${responseRegister.body}');
 
     if (token == null) {
       // Token não encontrado, redireciona para o login após o frame atual
