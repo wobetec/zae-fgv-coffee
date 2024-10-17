@@ -71,7 +71,7 @@ class _SignupPageState extends State<SignupPage> {
 
       final response = await http
           .post(
-            Uri.parse('${Config.baseUrl}/signup'),
+            Uri.parse('${Config.baseUrl}/auth/signup'),
             headers: {'Content-Type': 'application/json'},
             body: json.encode(data),
           )
