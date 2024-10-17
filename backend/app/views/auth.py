@@ -9,6 +9,7 @@ from app.serializers import UserSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from fcm_django.models import FCMDevice
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, authentication_classes
@@ -50,11 +51,16 @@ def login(request):
 
 
 @api_view(["POST"])
-@authentication_classes([TokenAuthentication])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def logout(request):
     """
     This view logs out a user by deleting their token
+
+    request format:
+        {
+            "device_id": device_id
+        }
 
     response format:
         {
@@ -62,8 +68,17 @@ def logout(request):
         }
     """
     try:
-        token = Token.objects.get(user=request.user)
+        if "device_id" not in request.data:
+            return Response({"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Delete device
+        device = get_object_or_404(FCMDevice, device_id=request.data["device_id"])
+        device.delete()
+        
+        # Delete the token
+        token = get_object_or_404(Token, user=request.user)
         token.delete()
+
         return Response({"success": "Successfully logged out"}, status=status.HTTP_200_OK)
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
