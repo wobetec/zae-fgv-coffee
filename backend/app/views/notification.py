@@ -12,20 +12,6 @@ from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from fcm_django.models import FCMDevice
-from firebase_admin.messaging import Message, Notification
-
-
-def notify_user(user, title, body):
-    devices = FCMDevice.objects.filter(user=user).all()
-    if devices:
-        devices.send_message(
-            Message(
-                notification=Notification(
-                    title=title,
-                    body=body
-                )
-            )
-        )
 
 
 @api_view(["POST"])
