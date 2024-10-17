@@ -13,7 +13,7 @@ class Product(models.Model):
 
 
 class VendingMachine(models.Model):
-    vm_id = models.CharField(max_length=50, primary_key=True)
+    vm_id = models.CharField(max_length=50, primary_key=True, auto_created=True)
     vm_floor = models.IntegerField()
 
     def __str__(self):
