@@ -2,13 +2,16 @@
 Django settings for backend project.
 """
 
+import os
+from firebase_admin import initialize_app, credentials
+from google.auth import load_credentials_from_file
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.2.109']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv("DJANGO_HOST")]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -19,6 +22,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
+    "fcm_django",
+    "corsheaders",
     "app.apps.AppConfig",
 ]
 
@@ -30,7 +35,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True 
 
 ROOT_URLCONF = "backend.urls"
 
@@ -96,4 +104,24 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+}
+
+# FCMDjango settings
+class CustomFirebaseCredentials(credentials.ApplicationDefault):
+    def __init__(self, account_file_path: str):
+        super().__init__()
+        self._account_file_path = account_file_path
+
+    def _load_credential(self):
+        if not self._g_credential:
+            self._g_credential, self._project_id = load_credentials_from_file(self._account_file_path, scopes=credentials._scopes)
+
+custom_credentials = CustomFirebaseCredentials(os.path.join(BASE_DIR, 'app/tokens/zae-fgv-coffee-firebase-adminsdk.json'))
+FIREBASE_MESSAGING_APP = initialize_app(custom_credentials, name='messaging')
+
+FCM_DJANGO_SETTINGS = {
+    "DEFAULT_FIREBASE_APP": FIREBASE_MESSAGING_APP,
+    "APP_VERBOSE_NAME": "FCM Django",
+    "ONE_DEVICE_PER_USER": False,
+    "DELETE_INACTIVE_DEVICES": False,
 }

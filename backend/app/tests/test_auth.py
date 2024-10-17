@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from fcm_django.models import FCMDevice
 
 
 class TestLogin(APITestCase):
@@ -59,6 +60,35 @@ class TestLogin(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("error", response.data)
         self.assertEqual(response.data["error"], "Missing password")
+
+
+class TestLogout(APITestCase):
+    
+    def setUp(self):
+        self.url = reverse("app:logout")
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpassword",
+            email="testuser@email.com"
+        )
+        self.token = Token.objects.create(user=self.user)
+        self.device = FCMDevice.objects.create(
+            device_id="1234567890",
+            type="android",
+            registration_id="fcm_token",
+        )
+    
+    def test_logout(self):
+        # Verify token
+        response = self.client.get(reverse("app:test_token"), HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        response = self.client.post(self.url, data={"device_id": self.device.device_id}, HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify token
+        response = self.client.get(reverse("app:test_token"), HTTP_AUTHORIZATION=f"Token {self.token.key}")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class TestSignUp(APITestCase):

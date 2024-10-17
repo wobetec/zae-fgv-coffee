@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class Config {
-  static const String BASE_URL = 'http://192.168.2.109:8080';
+  static final String baseUrl = 'http://${dotenv.env['DJANGO_HOST'] ?? 'localhost'}:${dotenv.env['DJANGO_PORT'] ?? '8000'}';
 }

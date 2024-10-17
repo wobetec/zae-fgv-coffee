@@ -1,10 +1,8 @@
-// lib/pages/user_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../config.dart'; // Importa a configuração com a BASE_URL
+import '../config.dart'; // Importa a configuração com a baseUrl
 
 class UserPage extends StatefulWidget {
   @override
@@ -31,7 +29,7 @@ class _UserPageState extends State<UserPage> {
     try {
       // Envia a requisição GET para verificar o token
       final response = await http.get(
-        Uri.parse('${Config.BASE_URL}/test_token'),
+        Uri.parse('${Config.baseUrl}/test_token'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Token $token',
@@ -61,13 +59,43 @@ class _UserPageState extends State<UserPage> {
     }
   }
 
-  // Método para realizar o logout
-  void _logout() async {
+  // Método para realizar o logout com confirmação
+  void _logout() {
+    _showConfirmationDialog();
+  }
+
+  void _performLogout() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('authToken');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pushReplacementNamed(context, '/login');
     });
+  }
+
+  // Método para exibir o diálogo de confirmação de logout
+  void _showConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Confirmação'),
+        content: Text('Deseja realmente sair?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Fecha o diálogo
+            },
+            child: Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Fecha o diálogo
+              _performLogout(); // Realiza o logout
+            },
+            child: Text('Sair'),
+          ),
+        ],
+      ),
+    );
   }
 
   // Método para exibir diálogos de erro ou mensagem
@@ -103,16 +131,17 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Página do Usuário'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
-            onPressed: _logout, // Botão de logout
+            onPressed: _logout,
           ),
         ],
       ),
       body: Center(
         child: _isLoading
-            ? CircularProgressIndicator() // Exibe indicador de carregamento
+            ? CircularProgressIndicator()
             : Text(
                 'Bem-vindo, $_username!',
                 style: TextStyle(fontSize: 24),
