@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Product(models.Model):
-    prod_id = models.CharField(max_length=50, primary_key=True)
+    prod_id = models.CharField(max_length=50, primary_key=True, auto_created=True)
     prod_name = models.CharField(max_length=50)
     prod_description = models.CharField(max_length=200)
     prod_price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -21,8 +21,8 @@ class VendingMachine(models.Model):
 
 
 class Stock(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, primary_key=True)
-    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, primary_key=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE)
     stock_quantity = models.IntegerField()
 
     class Meta:
@@ -30,9 +30,9 @@ class Stock(models.Model):
 
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, primary_key=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, primary_key=True)
-    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('user', 'product', 'vending_machine')
