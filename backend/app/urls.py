@@ -11,6 +11,5 @@ urlpatterns = [
     re_path(r"^auth/logout$", auth.logout, name="logout"),
     re_path(r"^auth/signup$", auth.signup, name="signup"),
     re_path(r"^auth/test_token$", auth.test_token, name="test_token"),
-
     re_path(r"^notification/register_device$", notification.register_device, name="register_device"),
 ]
