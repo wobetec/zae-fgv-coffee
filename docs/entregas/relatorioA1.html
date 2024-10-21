@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAE FGV Coffee</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="../index.html">
+            <h1><small>ZAE FGV Coffee</small></h1>
+        </a>
+    </nav>
+    <div class="container mb-4">
+        <div class="col">
+            <h1 class="text-center">Relatório - Desenvolvimento Sprint 1</h1>
+
+            <h2>Introdução</h2>
+            <p>O presente relatório aborda o desenvolvimento de um aplicativo de rede social com funcionalidades para o acesso e utilização de vending machines dentro da FGV. O objetivo principal do projeto é criar uma plataforma que possibilite aos usuários realizar compras em vending machines de forma prática e interativa, combinando a conveniência da automação com os aspectos sociais de uma rede de colaboração, permitindo o compatilhamento de experiências e serviços voluntários de entregas.</p>
+
+            <p>Além de resolver o problema proposto, o desenvolvimento deste aplicativo serve como um estudo de caso para a aplicação dos conceitos e práticas de engenharia de software. Ao longo do relatório, iremos descrever o processo de decisão e a experiência utilizando as metodologias propostas em aula, desde o levantamento de requisitos e modelagem do sistema até a implementação e testes.</p>
+
+            <h2>Características de Arquitetura</h2>
+            <p>
+                Os requisitos de arquitetura essenciais para o aplicativo são:
+            </p>
+            <ul>
+                <li>
+                    <strong>Desempenho:</strong> Como o aplicativo envolve múltiplas interações com vending machines e outros usuários, o desempenho é essencial para garantir que as transações e comunicações ocorram sem atrasos perceptíveis. A arquitetura deve reduzir a latência e minimizar a quantidade de comunicação entre componentes distribuídos.
+                </li>
+                <li>
+                    <strong>Segurança:</strong> A segurança é importante para proteger as informações dos usuários e as transações realizadas.
+                </li>
+                <li>
+                    <strong>Manutenibilidade:</strong> Para facilitar a evolução do sistema ao longo do tempo, a arquitetura deve usar componentes pequenos e independentes que possam ser facilmente modificados ou substituídos sem impacto significativo em outras partes do sistema.
+                </li>
+            </ul>
+            <p>
+                Para atender aos requisitos de desempenho, segurança e manutenibilidade do aplicativo, utilizaremos o Django com Python para o desenvolvimento do backend, aproveitando sua estrutura modular e suporte a componentes reutilizáveis para facilitar a manutenção. O Django permitirá a implementação de uma arquitetura em camadas, onde cada módulo desempenha uma função específica, facilitando futuras modificações e garantindo um desempenho consistente. 
+                Para o armazenamento de dados e comunicação em tempo real, utilizaremos o Firebase, que oferecerá suporte escalável para notificações e sincronização de dados, reduzindo a latência nas interações com as vending machines e usuários. 
+                A segurança será reforçada por meio da autenticação por token, utilizando bibliotecas como o Django Rest Framework, garantindo que apenas usuários autenticados possam acessar ou modificar os recursos do sistema, protegendo as informações pessoais e transações realizadas.
+            </p>
+            <p>
+                Uma visão mais detalhada da escolha de arquitetura pode ser vista na figura abaixo:
+            </p>
+            <img src="arch.jpeg" alt="Diagrama de Arquitetura" style="display: block; margin-left: auto; margin-right: auto;">   
+            
+            <h2>Aplicação das Práticas de Extreme Programming (XP)</h2>
+            <p>
+                Durante o desenvolvimento do projeto, buscamos adotar várias práticas do Extreme Programming (XP) para garantir agilidade e qualidade no desenvolvimento do sistema. A seguir, apresentamos as práticas que foram seguidas e aquelas que não foram implementadas, com justificativas para as decisões tomadas.
+            </p>
+
+            <h4>Programação em Pares (Pair Programming)</h4>
+            <p>
+                Embora tenhamos adotado a programação em pares em alguns momentos, não a aplicamos em todas as tarefas devido a limitações de tempo e disponibilidade dos membros da equipe, que tinham horários diferentes para o desenvolvimento. Como resultado, algumas tarefas foram realizadas individualmente para otimizar o progresso do desenvolvimento, especialmente em funcionalidades mais simples ou de menor risco.
+            </p>
+
+            <h4>Desenvolvimento Orientado a Testes (Test-Driven Development - TDD)</h4>
+            <p>
+                Utilizamos TDD para funcionalidades-chave, como a autenticação, login e envio de notificações para os usuários. Escrever os testes antes do desenvolvimento ajudou a agilizar as modificações futuras, permitindo entender de maneira rápida quando as modificações quebravam o código. Para tarefas muito simples, não implementamos testes, como por exemplo, as definições dos modelos de banco de dados no Django.
+            </p>
+
+            <h4>Integração Contínua (Continuous Integration - CI)</h4>
+            <p>
+                Por enquanto decidimos por não ter um pipeline de “produção” devido ao estágio inicial do projeto. No futuro pode ser algo a ser aplicado, mas ainda não fazia sentido dado o que tínhamos.
+            </p>
+
+            <h4>Releases Pequenas e Frequentes</h4>
+            <p>
+                Seguimos a prática de desenvolver incrementos pequenos e frequentes do sistema, com entregas a cada semana. Isso permitiu termos avanços a cada momento, e facilitou a integração das diversas funcionalidades sendo desenvolvidas.
+            </p>
+
+        </div>
+    </div>
+</body>
+</html>
