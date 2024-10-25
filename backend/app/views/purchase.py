@@ -5,11 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
-from app.serializers import FCMDeviceSerializer
-
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, authentication_classes
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from fcm_django.models import FCMDevice
 from firebase_admin.messaging import Message, Notification

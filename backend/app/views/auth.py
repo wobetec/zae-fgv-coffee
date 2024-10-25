@@ -23,12 +23,12 @@ def login(request):
     """
     This view logs in a user and returns a token
 
-    request format: 
+    request format:
         {
             "username": username,
             "password": password
         }
-    
+
     response format:
         {
             "token": token,
@@ -41,7 +41,7 @@ def login(request):
         return Response({"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST)
 
     user = get_object_or_404(User, username=request.data["username"])
-    
+
     if not user.check_password(request.data["password"]):
         return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -70,11 +70,11 @@ def logout(request):
     try:
         if "device_id" not in request.data:
             return Response({"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         # Delete device
         device = get_object_or_404(FCMDevice, device_id=request.data["device_id"])
         device.delete()
-        
+
         # Delete the token
         token = get_object_or_404(Token, user=request.user)
         token.delete()
