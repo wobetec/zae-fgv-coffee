@@ -10,6 +10,16 @@ To setup the database, use the following command:
 
     python manage.py migrate
 
+## Creating a superuser
+To create a superuser, use the following command:
+
+    python manage.py createsuperuser
+
+## Populating the database
+To populate the database with the initial data, use the following command:
+
+    python manage.py populate
+
 ## Running the server
 To run the server, use the following command:
 
