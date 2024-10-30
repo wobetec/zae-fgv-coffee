@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv("DJANGO_HOST")]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", os.getenv("DJANGO_HOST")]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -35,10 +35,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True 
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = "backend.urls"
 
@@ -95,16 +95,19 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
     ],
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.AdminRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.AdminRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
     ],
-    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
+
+AUTH_USER_MODEL = "app.User"
+
 
 # FCMDjango settings
 class CustomFirebaseCredentials(credentials.ApplicationDefault):
@@ -114,10 +117,15 @@ class CustomFirebaseCredentials(credentials.ApplicationDefault):
 
     def _load_credential(self):
         if not self._g_credential:
-            self._g_credential, self._project_id = load_credentials_from_file(self._account_file_path, scopes=credentials._scopes)
+            self._g_credential, self._project_id = load_credentials_from_file(
+                self._account_file_path, scopes=credentials._scopes
+            )
 
-custom_credentials = CustomFirebaseCredentials(os.path.join(BASE_DIR, 'app/tokens/zae-fgv-coffee-firebase-adminsdk.json'))
-FIREBASE_MESSAGING_APP = initialize_app(custom_credentials, name='messaging')
+
+custom_credentials = CustomFirebaseCredentials(
+    os.path.join(BASE_DIR, "app/tokens/zae-fgv-coffee-firebase-adminsdk.json")
+)
+FIREBASE_MESSAGING_APP = initialize_app(custom_credentials, name="messaging")
 
 FCM_DJANGO_SETTINGS = {
     "DEFAULT_FIREBASE_APP": FIREBASE_MESSAGING_APP,

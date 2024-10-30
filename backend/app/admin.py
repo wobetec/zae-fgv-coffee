@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import (
+    User,
     Product,
     VendingMachine,
     Stock,
@@ -10,6 +11,7 @@ from .models import (
     Sell
 )
 
+admin.site.register(User)
 admin.site.register(Product)
 admin.site.register(VendingMachine)
 admin.site.register(Stock)

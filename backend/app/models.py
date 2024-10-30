@@ -1,5 +1,29 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, Group, Permission
+
+
+class User(AbstractUser):
+    is_support_user = models.BooleanField(default=False)
+
+    # Set related_name to avoid clashes with the default User model
+    groups = models.ManyToManyField(
+        Group,
+        related_name='custom_user_set',  # Change to something unique
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        verbose_name='groups',
+    )
+
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='custom_user_set',  # Change to something unique
+        blank=True,
+        help_text='Specific permissions for this user.',
+        verbose_name='user permissions',
+    )
+
+    def __str__(self):
+        return self.username
 
 
 class Product(models.Model):
@@ -34,7 +58,19 @@ class Stock(models.Model):
 
 
 class SupportUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
+
+    def save(self, *args, **kwargs):
+        if not self.user.is_support_user:
+            self.user.is_support_user = True
+            self.user.save()
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.user.is_support_user:
+            self.user.is_support_user = False
+            self.user.save()
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.user.username
