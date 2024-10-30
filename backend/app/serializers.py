@@ -2,9 +2,9 @@
 Define serializers for the app application.
 """
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from fcm_django.models import FCMDevice
 from .models import (
+    User,
     Product,
     VendingMachine,
     Stock,
