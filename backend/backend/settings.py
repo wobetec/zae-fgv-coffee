@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv("DJANGO_HOST")]
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -61,9 +61,20 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+     'default': {
+         'ENGINE': 'django.db.backends.mysql',
+         'HOST': '/cloudsql/tensile-psyche-440213-g7:us-central1:zae-bd',
+         'PORT' : '3307',
+         'USER': 'root',
+         'PASSWORD': '1234',
+         'NAME': 'zae-prod',
+         'OPTIONS': {
+            'ssl': {
+                'ca': 'client-cert.pem',
+                'cert': 'client_cert.pem',
+                'key': 'client_key.pem',
+            }
+        }
     }
 }
 
@@ -125,3 +136,5 @@ FCM_DJANGO_SETTINGS = {
     "ONE_DEVICE_PER_USER": False,
     "DELETE_INACTIVE_DEVICES": False,
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
