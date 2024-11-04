@@ -6,6 +6,7 @@ import os
 from firebase_admin import initialize_app, credentials
 from google.auth import load_credentials_from_file
 from pathlib import Path
+import pymysql
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
@@ -63,20 +64,14 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
      'default': {
          'ENGINE': 'django.db.backends.mysql',
-         'HOST': '/cloudsql/tensile-psyche-440213-g7:us-central1:zae-bd',
-         'PORT' : '3307',
-         'USER': 'root',
-         'PASSWORD': '1234',
-         'NAME': 'zae-prod',
-         'OPTIONS': {
-            'ssl': {
-                'ca': 'client-cert.pem',
-                'cert': 'client_cert.pem',
-                'key': 'client_key.pem',
-            }
-        }
-    }
+         'HOST': os.getenv('HOST'),
+         'PORT' : os.getenv('PORT'),
+         'USER': os.getenv('USER'),
+         'PASSWORD': os.getenv('PASSWORD'),
+         'NAME': os.getenv('NAME'),
+   }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,3 +133,7 @@ FCM_DJANGO_SETTINGS = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# por que deus quis
+pymysql.version_info = (1, 4, 6, "final", 0)
+pymysql.install_as_MySQLdb()
