@@ -1,172 +1,162 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config.dart'; // Importa a configuração com a baseUrl
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:android_id/android_id.dart';
+import 'components/menu_option.dart';
+import 'components/custom_bottom_nav_bar.dart';
+import 'home_app_page.dart';
+import 'my_favorite.dart'; // Importa a nova página
 
 class UserPage extends StatefulWidget {
+  const UserPage({Key? key}) : super(key: key);
+
   @override
-  State<UserPage> createState() => _UserPageState();
+  _UserPageState createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
-  String _username = '';
-  bool _isLoading = true; // Indicador de carregamento
-  String? _fcmToken;
+  String username = '';
+  String email = '';
 
-  // Método para buscar os dados do usuário
-  Future<void> _fetchUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
-    String? fcmToken = await FirebaseMessaging.instance.getToken(vapidKey: Config.vapidKey);
-    setState(() {
-      _fcmToken = fcmToken;
-      print('Token FCM: $_fcmToken');
-    });
-
-    const androidIdPlugin = AndroidId();
-    final String? androidId = await androidIdPlugin.getId();
-
-    final responseRegister = await http.post(
-      Uri.parse('${Config.baseUrl}/notification/register_device'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
-      },
-      body: json.encode({'device_id': androidId, 'registration_id': fcmToken, 'type': 'android'}),
-    );
-    print('ResponseRegister Body: ${responseRegister.body}');
-
-    if (token == null) {
-      // Token não encontrado, redireciona para o login após o frame atual
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/login');
-      });
-      return;
-    }
-
-    try {
-      // Envia a requisição GET para verificar o token
-      final response = await http.get(
-        Uri.parse('${Config.baseUrl}/auth/test_token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        var responseData = json.decode(response.body);
-        setState(() {
-          _username = responseData['username'] ?? 'Usuário';
-          _isLoading = false; // Oculta o indicador de carregamento
-        });
-      } else {
-        // Token inválido ou expirado
-        setState(() {
-          _isLoading = false; // Oculta o indicador de carregamento
-        });
-        _showDialog('Erro', 'Sessão expirada. Faça login novamente.', onOk: () {
-          _logout();
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
-      });
-      _showDialog('Erro', 'Ocorreu um erro. Tente novamente.');
-    }
-  }
-
-  // Método para realizar o logout com confirmação
-  void _logout() {
-    _showConfirmationDialog();
-  }
-
-  void _performLogout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('authToken');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
-  }
-
-  // Método para exibir o diálogo de confirmação de logout
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Confirmação'),
-        content: Text('Deseja realmente sair?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Fecha o diálogo
-            },
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Fecha o diálogo
-              _performLogout(); // Realiza o logout
-            },
-            child: Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Método para exibir diálogos de erro ou mensagem
-  void _showDialog(String title, String message, {VoidCallback? onOk}) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (onOk != null) {
-                onOk();
-              }
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+  int _currentIndex = 1; // Define como 1 para destacar o 'Profile'
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); // Busca os dados do usuário ao iniciar a página
+    _loadUserData();
+  }
+
+  // Função para carregar os dados do usuário do SharedPreferences
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username') ?? 'User';
+      email = prefs.getString('email') ?? 'email@example.com';
+    });
+  }
+
+  // Função para lidar com o sign out
+  void _signOut() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
+  void _onNavBarTap(int index) {
+    if (index == 0) {
+      // Navegar para HomeAppPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeAppPage()),
+      );
+    }
+    // Se o índice for 1, já estamos na página de perfil.
   }
 
   @override
   Widget build(BuildContext context) {
+    // Define as cores
+    final primaryColor = Color(0xFFFF5722);
+    final textColor = Color(0xFF232323);
+    final backgroundColor = Color(0xFFFFFFFF);
+    final cardColor = Color(0xFFE2E2E2);
+
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text('Página do Usuário'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _logout,
+        title: Text(
+          'My Profile',
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
+        backgroundColor: primaryColor,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
+      ),
+      body: ListView(
+        children: [
+          // User Info Card
+          Container(
+            margin: EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.account_circle,
+                  size: 64,
+                  color: textColor,
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        username,
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: textColor,
+                          fontFamily: 'Roboto-SemiBold',
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        email,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: textColor,
+                          fontFamily: 'Roboto-Regular',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Menu Options
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                Divider(color: cardColor),
+                MenuOption(
+                  icon: Icons.history,
+                  title: 'Order History',
+                  onTap: () {
+                    // Handle Order History tap
+                  },
+                ),
+                Divider(color: cardColor),
+                MenuOption(
+                  icon: Icons.favorite,
+                  title: 'My Favorite',
+                  onTap: () {
+                    // Navegar para a MyFavoritePage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyFavoritePage()),
+                    );
+                  },
+                ),
+                Divider(color: cardColor),
+                MenuOption(
+                  icon: Icons.logout,
+                  title: 'Sign Out',
+                  onTap: _signOut,
+                ),
+                Divider(color: cardColor),
+              ],
+            ),
           ),
         ],
       ),
-      body: Center(
-        child: _isLoading
-            ? CircularProgressIndicator()
-            : Text(
-                'Bem-vindo, $_username!',
-                style: TextStyle(fontSize: 24),
-              ),
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavBarTap,
       ),
     );
   }
