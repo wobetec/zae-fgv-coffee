@@ -78,7 +78,7 @@ class SupportUser(models.Model):
 
 class Order(models.Model):
     order_id = models.CharField(max_length=50, primary_key=True, auto_created=True)
-    order_total = models.DecimalField(max_digits=100, decimal_places=2)
+    order_total = models.DecimalField(max_digits=65, decimal_places=2)
     order_date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
     vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, related_name='orders')

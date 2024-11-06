@@ -6,12 +6,13 @@ import os
 from firebase_admin import initialize_app, credentials
 from google.auth import load_credentials_from_file
 from pathlib import Path
+import pymysql
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", os.getenv("DJANGO_HOST")]
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -60,12 +61,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "backend.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if os.getenv('ENV') == 'PROD':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'HOST': os.getenv('HOST'),
+            'PORT' : os.getenv('PORT'),
+            'USER': os.getenv('USER'),
+            'PASSWORD': os.getenv('PASSWORD'),
+            'NAME': os.getenv('NAME'),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -133,3 +147,9 @@ FCM_DJANGO_SETTINGS = {
     "ONE_DEVICE_PER_USER": False,
     "DELETE_INACTIVE_DEVICES": False,
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# por que deus quis
+pymysql.version_info = (1, 4, 6, "final", 0)
+pymysql.install_as_MySQLdb()
