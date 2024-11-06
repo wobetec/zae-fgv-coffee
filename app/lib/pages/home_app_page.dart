@@ -1,9 +1,12 @@
+// lib/pages/home_app_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'components/item_card.dart';
+import 'components/product_card.dart';
 import 'components/custom_bottom_nav_bar.dart';
 import 'user_page.dart';
-import 'vending_machine_page.dart'; // Importa a nova página
+import 'vending_machine_page.dart';
+import 'constants.dart';
 
 class HomeAppPage extends StatefulWidget {
   const HomeAppPage({Key? key}) : super(key: key);
@@ -31,13 +34,14 @@ class _HomeAppPageState extends State<HomeAppPage> {
 
   int _currentIndex = 0;
 
-  // Dados de exemplo para a lista
-  final List<Map<String, dynamic>> _items = List.generate(10, (index) {
+  // Dados de exemplo para a lista de produtos
+  final List<Map<String, dynamic>> _products = List.generate(10, (index) {
     return {
-      'title': 'Vending Machine ${index + 1}',
+      'title': 'Produto ${index + 1}',
       'subtitle': 'Categoria ${index + 1}',
       'imageUrl': '', // Substitua por URLs reais se disponível
-      'rating': 5.0,
+      'rating': 4.5, // Exemplo de avaliação
+      'vendingMachineId': index % 3, // Exemplo de ID da máquina de venda
     };
   });
 
@@ -46,7 +50,7 @@ class _HomeAppPageState extends State<HomeAppPage> {
       _currentIndex = index;
     });
     if (index == 1) {
-      // Navegar para a página de perfil
+      // Navegar para a página de perfil do usuário
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => UserPage()),
@@ -56,9 +60,6 @@ class _HomeAppPageState extends State<HomeAppPage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Color(0xFFFF5722);
-    final textColor = Color(0xFF232323);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -75,21 +76,21 @@ class _HomeAppPageState extends State<HomeAppPage> {
         automaticallyImplyLeading: false, // Remove o botão de voltar
       ),
       body: ListView.builder(
-        itemCount: _items.length,
+        itemCount: _products.length,
         itemBuilder: (context, index) {
-          final item = _items[index];
-          return ItemCard(
-            title: item['title'],
-            subtitle: item['subtitle'],
-            imageUrl: item['imageUrl'],
-            rating: item['rating'],
+          final product = _products[index];
+          return ProductCard(
+            title: product['title'],
+            subtitle: product['subtitle'],
+            imageUrl: product['imageUrl'],
+            rating: product['rating'],
             onTap: () {
-              // Navegar para a página da máquina de venda selecionada
+              // Navegar para a máquina de venda que possui o produto selecionado
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => VendingMachinePage(
-                    vendingMachineData: item,
+                    productData: product,
                   ),
                 ),
               );

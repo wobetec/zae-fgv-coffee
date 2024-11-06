@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'reports_page.dart';
-import 'admin_vending_machine_page.dart';
 import 'login_page.dart';
+import 'constants.dart'; // Importar o arquivo de constantes
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
@@ -18,9 +18,6 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Color(0xFFFF5722);
-    final textColor = Color(0xFF232323);
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -28,149 +25,157 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
         elevation: 0,
         title: Text(
           'My Profile',
-          style: TextStyle(
-            fontSize: 24,
-            color: textColor,
-            fontFamily: 'Roboto-SemiBold',
-          ),
+          style: appBarTextStyle,
         ),
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
-          // Header com o texto 'Admin'
-          Container(
-            width: double.infinity,
-            color: primaryColor,
-            padding: EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-            child: Text(
-              'Admin',
-              style: TextStyle(
-                fontSize: 24,
-                color: textColor,
-                fontFamily: 'Roboto-SemiBold',
+          // Cabeçalho indicando o papel do usuário
+          ProfileHeader(title: 'Admin'),
+          // Cartão com informações do perfil
+          ProfileCard(name: adminName, email: adminEmail),
+          // Lista de opções
+          Expanded(child: OptionList()),
+        ],
+      ),
+    );
+  }
+}
+
+// Componente para o cabeçalho
+class ProfileHeader extends StatelessWidget {
+  final String title;
+
+  const ProfileHeader({Key? key, required this.title}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: primaryColor,
+      padding: EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+      width: double.infinity,
+      child: Text(
+        title,
+        style: headerTextStyle,
+      ),
+    );
+  }
+}
+
+// Componente para o cartão de perfil
+class ProfileCard extends StatelessWidget {
+  final String name;
+  final String email;
+
+  const ProfileCard({Key? key, required this.name, required this.email})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: secondaryColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          // Placeholder para a imagem do perfil
+          CircleAvatar(
+            radius: 35,
+            backgroundColor: Colors.white,
+            child: Icon(
+              Icons.account_circle,
+              size: 70,
+              color: Colors.grey,
+            ),
+          ),
+          SizedBox(width: 16),
+          // Nome e Email do Administrador
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                name,
+                style: profileNameTextStyle,
               ),
-            ),
-          ),
-          // Cartão de Perfil
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Color(0xFFE2E2E2),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Row(
-              children: [
-                // Placeholder para a imagem do perfil
-                Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.account_circle,
-                    size: 70,
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(width: 16),
-                // Nome e Email do Administrador
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      adminName,
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.black,
-                        fontFamily: 'Roboto-SemiBold',
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      adminEmail,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontFamily: 'Roboto-Regular',
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          // Lista de Opções
-          Expanded(
-            child: ListView(
-              children: [
-                ListTile(
-                  title: Text(
-                    'Reports',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: textColor,
-                      fontFamily: 'Roboto-SemiBold',
-                    ),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ReportsPage()),
-                    );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text(
-                    'Vending Machines',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: textColor,
-                      fontFamily: 'Roboto-SemiBold',
-                    ),
-                  ),
-                  trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Navegar para a página de vending machines do administrador
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdminVendingMachinePage(),
-                      ),
-                    );
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.logout, color: textColor),
-                  title: Text(
-                    'Sign Out',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: textColor,
-                      fontFamily: 'Roboto-SemiBold',
-                    ),
-                  ),
-                  onTap: () {
-                    // Lógica para sair da conta e retornar à tela de login
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginPage()),
-                      (route) => false,
-                    );
-                  },
-                ),
-                Divider(),
-              ],
-            ),
+              SizedBox(height: 8),
+              Text(
+                email,
+                style: profileEmailTextStyle,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+// Componente para a lista de opções
+class OptionList extends StatelessWidget {
+  const OptionList({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: [
+        OptionListTile(
+          title: 'Reports',
+          trailing: Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ReportsPage()),
+            );
+          },
+        ),
+        Divider(),
+        OptionListTile(
+          leading: Icon(Icons.logout, color: textColor),
+          title: 'Sign Out',
+          onTap: () {
+            // Lógica para sair da conta e retornar à tela de login
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+              (route) => false,
+            );
+          },
+        ),
+        Divider(),
+      ],
+    );
+  }
+}
+
+// Componente personalizado para os itens da lista de opções
+class OptionListTile extends StatelessWidget {
+  final String title;
+  final VoidCallback onTap;
+  final Widget? leading;
+  final Widget? trailing;
+
+  const OptionListTile({
+    Key? key,
+    required this.title,
+    required this.onTap,
+    this.leading,
+    this.trailing,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: leading,
+      title: Text(
+        title,
+        style: optionTextStyle,
+      ),
+      trailing: trailing,
+      onTap: onTap,
     );
   }
 }

@@ -1,8 +1,13 @@
+// lib/pages/signin_adm_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
+import 'components/user_admin_switch.dart';
+import 'constants.dart';
 import 'admin_profile_page.dart';
+import 'login_page.dart';
 
 class SignInAdminPage extends StatefulWidget {
   @override
@@ -14,77 +19,32 @@ class _SignInAdminPageState extends State<SignInAdminPage> {
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
-
-  // Authentication code remains commented for future testing
-  // Future<void> _loginAsAdmin() async {
-  //   setState(() {
-  //     _isLoading = true;
-  //   });
-
-  //   String username = _usernameController.text.trim();
-  //   String password = _passwordController.text;
-
-  //   if (username.isEmpty || password.isEmpty) {
-  //     _showDialog('Error', 'All fields are required.');
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //     return;
-  //   }
-
-  //   // Data for the request
-  //   Map<String, String> data = {
-  //     'username': username,
-  //     'password': password,
-  //   };
-
-  //   try {
-  //     // Send POST request to the admin login endpoint
-  //     final response = await http.post(
-  //       Uri.parse('${Config.baseUrl}/auth/admin/login'),
-  //       headers: {'Content-Type': 'application/json'},
-  //       body: json.encode(data),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       var responseData = json.decode(response.body);
-  //       String token = responseData['token'];
-
-  //       SharedPreferences prefs = await SharedPreferences.getInstance();
-  //       await prefs.setString('authToken', token);
-  //       await prefs.setString('userType', 'admin');
-
-  //       // Navigate to the admin page or dashboard
-  //       Navigator.pushReplacement(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => AdminProfilePage()),
-  //       );
-  //     } else {
-  //       // Handle errors
-  //       var responseData = json.decode(response.body);
-  //       String errorMessage = responseData['error'] ?? 'Incorrect username or password.';
-  //       _showDialog('Error', errorMessage);
-  //     }
-  //   } catch (e) {
-  //     _showDialog('Error', 'An error occurred. Please try again.');
-  //   } finally {
-  //     setState(() {
-  //       _isLoading = false;
-  //     });
-  //   }
-  // }
+  bool isAdmin = true; // Switch state
 
   Future<void> _loginAsAdmin() async {
     setState(() {
       _isLoading = true;
     });
 
-    // Simulate a successful admin login
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      _showDialog('Error', 'Please fill in all fields.');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Simulate successful admin login
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('authToken', 'dummy_token');
+    await prefs.setString('username', username);
+    await prefs.setString('email', 'admin@example.com');
     await prefs.setString('userType', 'admin');
 
-    // Navigate to the admin profile page
+    // Navigate to AdminProfilePage
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => AdminProfilePage()),
@@ -117,6 +77,12 @@ class _SignInAdminPageState extends State<SignInAdminPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    isAdmin = true; // Ensure the switch starts on 'Admin'
+  }
+
+  @override
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
@@ -126,13 +92,8 @@ class _SignInAdminPageState extends State<SignInAdminPage> {
   // Updated build method
   @override
   Widget build(BuildContext context) {
-    // Define colors for reuse
-    final primaryColor = Color(0xFFFFFFFF);
-    final accentColor = Color(0xFFFF5722);
-    final textColor = Color(0xFF000000);
-
     return Scaffold(
-      backgroundColor: primaryColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           'Sign In as Admin',
@@ -140,21 +101,42 @@ class _SignInAdminPageState extends State<SignInAdminPage> {
             color: textColor,
           ),
         ),
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
+        actions: [
+          // Switch in the AppBar
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: UserAdminSwitch(
+              isAdmin: isAdmin,
+              onToggle: (val) {
+                setState(() {
+                  isAdmin = val;
+                });
+                if (!val) {
+                  // Navigate to LoginPage when switched to User
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                  );
+                }
+              },
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Username field
+            SizedBox(height: 30),
+            // Username and Password fields
             CustomInputField(
               controller: _usernameController,
               label: 'Username',
             ),
             SizedBox(height: 20),
-            // Password field
             CustomInputField(
               controller: _passwordController,
               label: 'Password',
@@ -167,9 +149,10 @@ class _SignInAdminPageState extends State<SignInAdminPage> {
                 : CustomButton(
                     text: 'Sign In as Admin',
                     onPressed: _loginAsAdmin,
-                    backgroundColor: accentColor,
+                    backgroundColor: primaryColor,
                     textColor: Colors.white,
                   ),
+            // Option to switch back to User login is now handled by the switch
           ],
         ),
       ),

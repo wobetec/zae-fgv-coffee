@@ -1,241 +1,179 @@
+// lib/pages/product_page.dart
+
 import 'package:flutter/material.dart';
 import 'user_page.dart';
 import 'home_app_page.dart';
-import 'components/custom_button.dart'; // Importe o seu componente de botão
+import 'components/custom_button.dart';
+import 'components/custom_bottom_nav_bar.dart';
+import 'components/product_image.dart';
+import 'components/star_rating.dart';
+import 'components/favorite_button.dart';
+import 'components/section.dart';
 
 class ProductPage extends StatefulWidget {
   final Map<String, dynamic> productData;
+  final Map<String, dynamic> vendingMachineData;
 
-  const ProductPage({Key? key, required this.productData}) : super(key: key);
+  const ProductPage({
+    Key? key,
+    required this.productData,
+    required this.vendingMachineData,
+  }) : super(key: key);
 
   @override
   _ProductPageState createState() => _ProductPageState();
 }
 
 class _ProductPageState extends State<ProductPage> {
+  double _currentRating = 0.0;
+  bool _isFavorited = false;
+
   @override
   Widget build(BuildContext context) {
     final product = widget.productData;
+    final vendingMachine = widget.vendingMachineData;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Imagem do Produto (Placeholder)
-          Positioned(
-            left: 0,
-            top: 0,
-            width: MediaQuery.of(context).size.width,
-            height: 298,
-            child: Container(
-              color: const Color(0xffd9d9d9),
-              child: Center(
-                child: Text(
-                  'IMAGEM DO PRODUTO',
-                  style: TextStyle(
-                    fontSize: 28,
-                    color: const Color(0xff000000),
-                    fontFamily: 'Roboto-SemiBold',
-                  ),
-                ),
-              ),
-            ),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFF5722),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: const Color(0xFF232323)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          product['title'] ?? 'Product',
+          style: TextStyle(
+            fontSize: 20,
+            color: const Color(0xFF232323),
+            fontFamily: 'Roboto-SemiBold',
           ),
-          // Botão de Voltar
-          Positioned(
-            left: 16,
-            top: 16,
-            child: IconButton(
-              icon: Icon(Icons.arrow_back, color: const Color(0xff000000)),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Imagem do Produto
+            ProductImage(
+              imageUrl: product['imageUrl'] ?? '',
             ),
-          ),
-          // Descrição
-          Positioned(
-            left: 15,
-            right: 15,
-            top: 342,
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.only(top: 9),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xffe2e2e2), width: 1),
-                    borderRadius: BorderRadius.circular(30),
+            // Detalhes do Produto
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Título do Produto
+                  Text(
+                    product['title'] ?? 'Título do Produto',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Roboto-SemiBold',
+                    ),
                   ),
-                  child: Text(
-                    'Descrição do produto aqui.',
+                  SizedBox(height: 8),
+                  // Categoria ou Subtítulo
+                  Text(
+                    product['subtitle'] ?? 'Categoria do Produto',
                     style: TextStyle(
                       fontSize: 16,
-                      color: const Color(0xff000000),
+                      color: Colors.grey,
                       fontFamily: 'Roboto-Regular',
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 10,
-                  top: 0,
-                  child: Container(
-                    color: const Color(0xffffffff),
-                    padding: EdgeInsets.symmetric(horizontal: 5),
-                    child: Text(
-                      'DESCRIPTION',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: const Color(0xff80869a),
-                        fontFamily: 'Roboto-Regular',
+                  SizedBox(height: 16),
+                  // Avaliação e Favorito
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Avaliação com Estrelas
+                      StarRating(
+                        rating: _currentRating,
+                        onRatingChanged: (rating) {
+                          setState(() {
+                            _currentRating = rating;
+                          });
+                          // Opcional: Enviar a avaliação para o backend
+                        },
                       ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Informações Nutricionais
-          Positioned(
-            left: 15,
-            right: 15,
-            top: 503,
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  margin: EdgeInsets.only(top: 9),
-                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xffe2e2e2), width: 1),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Text(
-                    'Informações nutricionais aqui.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: const Color(0xff000000),
-                      fontFamily: 'Roboto-Regular',
-                    ),
-                  ),
-                ),
-                Positioned(
-                  left: 10,
-                  top: 0,
-                  child: Container(
-                    color: const Color(0xffffffff),
-                    padding: EdgeInsets.symmetric(horizontal: 5),
-                    child: Text(
-                      'NUTRITIONAL INFORMATION',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: const Color(0xff80869a),
-                        fontFamily: 'Roboto-Regular',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Botão de Order usando o componente existente
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 80,
-            child: CustomButton(
-              text: 'Order',
-              onPressed: () {
-                // Simula a compra e imprime a mensagem no terminal
-                print('Produto ${product['title']} foi comprado');
-
-                // Opcional: Exibir uma mensagem de confirmação ao usuário
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Compra realizada'),
-                    content: Text('Você comprou o produto ${product['title']}.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('OK'),
+                      // Botão de Favorito
+                      FavoriteButton(
+                        isFavorited: _isFavorited,
+                        onPressed: () {
+                          setState(() {
+                            _isFavorited = !_isFavorited;
+                          });
+                          // Opcional: Atualizar favoritos no backend
+                        },
                       ),
                     ],
                   ),
-                );
-              },
-            ),
-          ),
-          // Rodapé
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: 66,
-              decoration: BoxDecoration(
-                color: const Color(0xffeef3fc),
-                border: Border.all(color: const Color(0xffe2e2e2), width: 1),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // Botão Home
-                  GestureDetector(
-                    onTap: () {
-                      // Navegar para HomeAppPage
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeAppPage()),
-                        (route) => false,
-                      );
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.home, color: const Color(0xff232323)),
-                        SizedBox(height: 8),
-                        Text(
-                          'Home',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: const Color(0xff232323),
-                            fontFamily: 'Roboto-Regular',
-                          ),
-                        ),
-                      ],
-                    ),
+                  SizedBox(height: 16),
+                  // Seção de Descrição
+                  Section(
+                    title: 'Description',
+                    content:
+                        product['description'] ?? 'Descrição do produto aqui.',
                   ),
-                  // Botão Profile
-                  GestureDetector(
-                    onTap: () {
-                      // Navegar para UserPage
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => UserPage()),
-                      );
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.account_circle, color: const Color(0xffff5722)),
-                        SizedBox(height: 8),
-                        Text(
-                          'Profile',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: const Color(0xffff5722),
-                            fontFamily: 'Roboto-Regular',
-                          ),
-                        ),
-                      ],
-                    ),
+                  SizedBox(height: 16),
+                  // Seção de Informações Nutricionais
+                  Section(
+                    title: 'Nutritional Information',
+                    content:
+                        product['nutrition'] ?? 'Informações nutricionais aqui.',
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            SizedBox(height: 80), // Espaço para o botão de pedido
+          ],
+        ),
+      ),
+      // Botão de Pedido
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: CustomButton(
+          text: 'Order',
+          onPressed: () {
+            // Simula a compra
+            print('Produto ${product['title']} foi comprado');
+            // Exibe uma mensagem de confirmação
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('Compra realizada'),
+                content: Text('Você comprou o produto ${product['title']}.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+      // Rodapé
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => HomeAppPage()),
+              (route) => false,
+            );
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => UserPage()),
+            );
+          }
+        },
       ),
     );
   }

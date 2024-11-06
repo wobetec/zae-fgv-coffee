@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/home_page.dart';
@@ -5,12 +7,11 @@ import 'pages/login_page.dart';
 import 'pages/signup_page.dart';
 import 'pages/user_page.dart';
 import 'pages/home_app_page.dart';
-import 'pages/my_favorite.dart';
+import 'pages/my_favorite_page.dart';
 import 'pages/signin_adm_page.dart';
-import 'pages/product_page.dart';
 import 'pages/admin_profile_page.dart';
-import 'pages/admin_vending_machine_page.dart';
 import 'pages/reports_page.dart';
+import 'pages/constants.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
 import 'package:firebase_core/firebase_core.dart';
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
       title: 'ZAE Coffee',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
       ),
       home: FutureBuilder<String>(
         future: _checkLoginStatus(),
@@ -80,9 +81,8 @@ class MyApp extends StatelessWidget {
               // Usuário está logado como usuário regular, vai para a HomeAppPage
               return HomeAppPage();
             } else if (snapshot.data == 'admin') {
-              // Usuário está logado como administrador
-              // Retorne a página inicial do administrador aqui quando for implementada
-              return SignInAdminPage();
+              // Usuário está logado como administrador, vai para AdminProfilePage
+              return AdminProfilePage();
             } else {
               // Usuário não está logado, vai para a página inicial
               return HomePage();
@@ -95,11 +95,9 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupPage(),
         '/user': (context) => UserPage(),
         '/home_app': (context) => HomeAppPage(),
-        '/my_favorite': (context) => MyFavoritePage(), // Nova rota
+        '/my_favorite': (context) => MyFavoritePage(),
         '/signin_admin': (context) => SignInAdminPage(),
-        '/product': (context) => ProductPage(productData: {}),
         '/adminProfile': (context) => AdminProfilePage(),
-        '/adminVendingMachines': (context) => AdminVendingMachinePage(),
         '/reports': (context) => ReportsPage(),
       },
     );

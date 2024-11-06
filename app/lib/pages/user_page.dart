@@ -1,9 +1,14 @@
+// lib/pages/user_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'components/user_info_card.dart';
 import 'components/menu_option.dart';
 import 'components/custom_bottom_nav_bar.dart';
 import 'home_app_page.dart';
-import 'my_favorite.dart'; // Importa a nova página
+import 'my_favorite_page.dart';
+import 'order_history_page.dart';
+import 'login_page.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -16,7 +21,7 @@ class _UserPageState extends State<UserPage> {
   String username = '';
   String email = '';
 
-  int _currentIndex = 1; // Define como 1 para destacar o 'Profile'
+  int _currentIndex = 1; // Highlight the 'Profile' tab
 
   @override
   void initState() {
@@ -24,7 +29,7 @@ class _UserPageState extends State<UserPage> {
     _loadUserData();
   }
 
-  // Função para carregar os dados do usuário do SharedPreferences
+  // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -33,27 +38,32 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  // Função para lidar com o sign out
+  // Function to handle sign out
   void _signOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    Navigator.pushReplacementNamed(context, '/login');
+    // Navigate to LoginPage
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+      (route) => false,
+    );
   }
 
   void _onNavBarTap(int index) {
     if (index == 0) {
-      // Navegar para HomeAppPage
+      // Navigate to HomeAppPage
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeAppPage()),
       );
     }
-    // Se o índice for 1, já estamos na página de perfil.
+    // If index is 1, we're already on the Profile page.
   }
 
   @override
   Widget build(BuildContext context) {
-    // Define as cores
+    // Define colors
     final primaryColor = Color(0xFFFF5722);
     final textColor = Color(0xFF232323);
     final backgroundColor = Color(0xFFFFFFFF);
@@ -75,47 +85,11 @@ class _UserPageState extends State<UserPage> {
       body: ListView(
         children: [
           // User Info Card
-          Container(
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.account_circle,
-                  size: 64,
-                  color: textColor,
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        username,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: textColor,
-                          fontFamily: 'Roboto-SemiBold',
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        email,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: textColor,
-                          fontFamily: 'Roboto-Regular',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          UserInfoCard(
+            username: username,
+            email: email,
+            textColor: textColor,
+            cardColor: cardColor,
           ),
           // Menu Options
           Padding(
@@ -127,18 +101,24 @@ class _UserPageState extends State<UserPage> {
                   icon: Icons.history,
                   title: 'Order History',
                   onTap: () {
-                    // Handle Order History tap
+                    // Navigate to OrderHistoryPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => OrderHistoryPage()),
+                    );
                   },
                 ),
                 Divider(color: cardColor),
                 MenuOption(
                   icon: Icons.favorite,
-                  title: 'My Favorite',
+                  title: 'My Favorites',
                   onTap: () {
-                    // Navegar para a MyFavoritePage
+                    // Navigate to MyFavoritePage
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => MyFavoritePage()),
+                      MaterialPageRoute(
+                          builder: (context) => MyFavoritePage()),
                     );
                   },
                 ),
