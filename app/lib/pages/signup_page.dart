@@ -1,13 +1,13 @@
-// lib/pages/signup_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../config.dart'; // Arquivo de configuração com a baseUrl
 import 'package:shared_preferences/shared_preferences.dart';
-import 'user_page.dart'; // Importamos a UserPage para navegar após o cadastro
 import 'package:connectivity_plus/connectivity_plus.dart'; // Para verificar conectividade
 import 'dart:io'; // Necessário para SocketException
+import 'components/custom_input_field.dart';
+import 'components/custom_button.dart';
+import 'home_app_page.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -21,13 +21,7 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false; // Indicador de carregamento
 
-  @override
-  void initState() {
-    super.initState();
-    // Nenhuma ação necessária no initState para este caso
-  }
-
-  // Verifica a conectividade de rede
+  // Método para verificar a conectividade de rede
   Future<void> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
@@ -40,82 +34,123 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   // Método para registrar o usuário
+  // Future<void> _register() async {
+  //   await _checkConnectivity(); // Verifica a conectividade antes do cadastro
+
+  //   setState(() {
+  //     _isLoading = true; // Exibe o indicador de carregamento
+  //   });
+
+  //   String username = _usernameController.text.trim();
+  //   String email = _emailController.text.trim();
+  //   String password = _passwordController.text;
+
+  //   if (username.isEmpty || email.isEmpty || password.isEmpty) {
+  //     _showDialog('Erro', 'Todos os campos são obrigatórios.');
+  //     setState(() {
+  //       _isLoading = false; // Oculta o indicador de carregamento
+  //     });
+  //     return;
+  //   }
+
+  //   Map<String, String> data = {
+  //     'username': username,
+  //     'email': email,
+  //     'password': password,
+  //   };
+
+  //   try {
+  //     print('Enviando requisição de cadastro para o servidor...');
+  //     print('Dados enviados: ${json.encode(data)}');
+
+  //     final response = await http
+  //         .post(
+  //           Uri.parse('${Config.baseUrl}/auth/signup'),
+  //           headers: {'Content-Type': 'application/json'},
+  //           body: json.encode(data),
+  //         )
+  //         .timeout(Duration(seconds: 10), onTimeout: () {
+  //       throw Exception('Conexão expirou');
+  //     });
+
+  //     print('Status Code: ${response.statusCode}');
+  //     print('Resposta do servidor: ${response.body}');
+
+  //     if (response.statusCode == 201) {
+  //       var responseData = json.decode(response.body);
+  //       String token = responseData['token'];
+  //       String username = responseData['username'];
+  //       String email = responseData['email'];
+
+  //       // Store the token, username, and email locally
+  //       SharedPreferences prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString('authToken', token);
+  //       await prefs.setString('username', username);
+  //       await prefs.setString('email', email);
+
+  //       // Navigate to the UserPage
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(builder: (context) => HomeAppPage()),
+  //       );
+  //     }
+  //     else {
+  //       var responseData = json.decode(response.body);
+  //       String errorMessage =
+  //           responseData['error'] ?? 'Erro ao cadastrar usuário.';
+  //       _showDialog('Erro', errorMessage);
+  //     }
+  //   } catch (e) {
+  //     print('Erro durante o cadastro: $e');
+  //     if (e is SocketException) {
+  //       print('SocketException: ${e.message}');
+  //       _showDialog('Erro',
+  //           'Não foi possível conectar ao servidor. Verifique sua conexão.');
+  //     } else {
+  //       _showDialog('Erro', 'Ocorreu um erro. Detalhes: $e');
+  //     }
+  //   } finally {
+  //     setState(() {
+  //       _isLoading = false; // Oculta o indicador de carregamento
+  //     });
+  //   }
+  // }
+
   Future<void> _register() async {
-    await _checkConnectivity(); // Verifica a conectividade antes do cadastro
+  setState(() {
+    _isLoading = true;
+  });
 
+  String username = _usernameController.text.trim();
+  String email = _emailController.text.trim();
+  String password = _passwordController.text.trim();
+
+  if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    _showDialog('Erro', 'Todos os campos são obrigatórios.');
     setState(() {
-      _isLoading = true; // Exibe o indicador de carregamento
+      _isLoading = false;
     });
-
-    String username = _usernameController.text.trim();
-    String email = _emailController.text.trim();
-    String password = _passwordController.text;
-
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      _showDialog('Erro', 'Todos os campos são obrigatórios.');
-      setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
-      });
-      return;
-    }
-
-    Map<String, String> data = {
-      'username': username,
-      'email': email,
-      'password': password,
-    };
-
-    try {
-      print('Enviando requisição de cadastro para o servidor...');
-      print('Dados enviados: ${json.encode(data)}');
-
-      final response = await http
-          .post(
-            Uri.parse('${Config.baseUrl}/auth/signup'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(data),
-          )
-          .timeout(Duration(seconds: 10), onTimeout: () {
-        throw Exception('Conexão expirou');
-      });
-
-      print('Status Code: ${response.statusCode}');
-      print('Resposta do servidor: ${response.body}');
-
-      if (response.statusCode == 201) {
-        var responseData = json.decode(response.body);
-        String token = responseData['token'];
-
-        // Armazenar o token no SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('authToken', token);
-
-        // Navegar para a UserPage
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserPage()),
-        );
-      } else {
-        var responseData = json.decode(response.body);
-        String errorMessage =
-            responseData['error'] ?? 'Erro ao cadastrar usuário.';
-        _showDialog('Erro', errorMessage);
-      }
-    } catch (e) {
-      print('Erro durante o cadastro: $e');
-      if (e is SocketException) {
-        print('SocketException: ${e.message}');
-        _showDialog('Erro',
-            'Não foi possível conectar ao servidor. Verifique sua conexão.');
-      } else {
-        _showDialog('Erro', 'Ocorreu um erro. Detalhes: $e');
-      }
-    } finally {
-      setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
-      });
-    }
+    return;
   }
+
+  // Simula um cadastro bem-sucedido
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setString('authToken', 'token_fake');
+  await prefs.setString('username', username);
+  await prefs.setString('email', email);
+  await prefs.setString('userType', 'user');
+
+  // Navega para a HomeAppPage
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => HomeAppPage()),
+  );
+
+  setState(() {
+    _isLoading = false;
+  });
+}
+
 
   // Método para exibir diálogos de erro ou sucesso
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
@@ -150,34 +185,80 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Define as cores para reutilização
+    final primaryColor = Color(0xFFFFFFFF);
+    final accentColor = Color(0xFFFF5722);
+    final textColor = Color(0xFF000000);
+
     return Scaffold(
+      backgroundColor: primaryColor,
       appBar: AppBar(
-        title: Text('Página de Cadastro'),
+        title: Text(
+          'Sign Up',
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
+        backgroundColor: primaryColor,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            // Campo de Nome de Usuário
+            CustomInputField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Nome de Usuário'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-              obscureText: true,
+              label: 'User',
             ),
             SizedBox(height: 20),
+            // Campo de Email
+            CustomInputField(
+              controller: _emailController,
+              label: 'Email',
+            ),
+            SizedBox(height: 20),
+            // Campo de Senha
+            CustomInputField(
+              controller: _passwordController,
+              label: 'Password',
+              obscureText: true,
+            ),
+            SizedBox(height: 30),
+            // Botão de Cadastro
             _isLoading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
+                : CustomButton(
+                    text: 'Sign Up',
                     onPressed: _register,
-                    child: Text('Cadastrar'),
+                    backgroundColor: accentColor,
+                    textColor: Colors.white,
                   ),
+            SizedBox(height: 20),
+            // Texto com "Already have an account? Sign In."
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/login');
+              },
+              child: RichText(
+                text: TextSpan(
+                  text: "Already have an account? ",
+                  style: TextStyle(
+                    color: textColor,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: 'Sign In.',
+                      style: TextStyle(
+                        color: accentColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
