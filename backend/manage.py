@@ -19,7 +19,7 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    
+
     runserver.default_port = os.getenv("DJANGO_PORT")
     runserver.default_addr = os.getenv("DJANGO_HOST")
 

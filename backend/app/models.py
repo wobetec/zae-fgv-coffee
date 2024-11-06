@@ -8,18 +8,18 @@ class User(AbstractUser):
     # Set related_name to avoid clashes with the default User model
     groups = models.ManyToManyField(
         Group,
-        related_name='custom_user_set',  # Change to something unique
+        related_name="custom_user_set",  # Change to something unique
         blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        verbose_name='groups',
+        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+        verbose_name="groups",
     )
 
     user_permissions = models.ManyToManyField(
         Permission,
-        related_name='custom_user_set',  # Change to something unique
+        related_name="custom_user_set",  # Change to something unique
         blank=True,
-        help_text='Specific permissions for this user.',
-        verbose_name='user permissions',
+        help_text="Specific permissions for this user.",
+        verbose_name="user permissions",
     )
 
     def __str__(self):
@@ -41,20 +41,24 @@ class VendingMachine(models.Model):
     vm_floor = models.IntegerField()
 
     def __str__(self):
-        return f'Vending Machine {self.vm_id}'
+        return f"Vending Machine {self.vm_id}"
 
 
 class Stock(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stocks')
-    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, related_name='stocks')
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="stocks"
+    )
+    vending_machine = models.ForeignKey(
+        VendingMachine, on_delete=models.CASCADE, related_name="stocks"
+    )
     stock_quantity = models.IntegerField()
     stock_date_update = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('product', 'vending_machine')
+        unique_together = ("product", "vending_machine")
 
     def __str__(self):
-        return f'{self.product.prod_name} in {self.vending_machine.vm_id}'
+        return f"{self.product.prod_name} in {self.vending_machine.vm_id}"
 
 
 class SupportUser(models.Model):
@@ -80,47 +84,55 @@ class Order(models.Model):
     order_id = models.CharField(max_length=50, primary_key=True, auto_created=True)
     order_total = models.DecimalField(max_digits=65, decimal_places=2)
     order_date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
-    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, related_name='orders')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
+    vending_machine = models.ForeignKey(
+        VendingMachine, on_delete=models.CASCADE, related_name="orders"
+    )
 
     def __str__(self):
-        return f'Order {self.order_id}'
+        return f"Order {self.order_id}"
 
 
 class Rating(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ratings')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="ratings"
+    )
     rating_star = models.IntegerField()
     rating_description = models.CharField(max_length=140)
     rating_date_update = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('user', 'product', 'rating_date_update')
+        unique_together = ("user", "product")
 
     def __str__(self):
-        return f'Rating by {self.user.username} for {self.product.prod_name} on {self.rating_date_update}'
+        return f"Rating by {self.user.username} for {self.product.prod_name} on {self.rating_date_update}"
 
 
 class Sell(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='sells')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='sells')
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="sells")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="sells")
     sell_quantity = models.IntegerField()
     sell_create_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('order', 'product')
+        unique_together = ("order", "product")
 
     def __str__(self):
-        return f'Sell {self.product.prod_name} in Order {self.order.order_id}'
+        return f"Sell {self.product.prod_name} in Order {self.order.order_id}"
 
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist')
-    vending_machine = models.ForeignKey(VendingMachine, on_delete=models.CASCADE, related_name='wishlist')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishlist")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="wishlist"
+    )
+    vending_machine = models.ForeignKey(
+        VendingMachine, on_delete=models.CASCADE, related_name="wishlist"
+    )
 
     class Meta:
-        unique_together = ('user', 'product', 'vending_machine')
+        unique_together = ("user", "product", "vending_machine")
 
     def __str__(self):
-        return f'{self.product.prod_name} in {self.vending_machine.vm_id} for {self.user.username}'
+        return f"{self.product.prod_name} in {self.vending_machine.vm_id} for {self.user.username}"

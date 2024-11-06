@@ -15,7 +15,17 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-Lógica de Programação entre as Telas
+## Tests
+
+### Create mockito mock
+
+    dart run build_runner build
+
+### Run tests
+
+    flutter test .\test
+
+### Lógica de Programação entre as Telas
 
 Este aplicativo foi desenvolvido para atender tanto usuários comuns quanto membros da equipe de suporte (anteriormente referidos como administradores). A interface é intuitiva e permite que os usuários naveguem facilmente entre as diferentes funcionalidades disponíveis para cada tipo de usuário.
 
