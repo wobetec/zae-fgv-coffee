@@ -1,4 +1,4 @@
-// lib/pages/login_page.dart
+// lib/pages/signin_adm_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,31 +6,30 @@ import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
-import 'home_app_page.dart';
-import 'signin_adm_page.dart';
+import 'admin_profile_page.dart';
+import 'login_page.dart';
 
-class LoginPage extends StatefulWidget {
+class SignInAdminPage extends StatefulWidget {
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignInAdminPage> createState() => _SignInAdminPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
+class _SignInAdminPageState extends State<SignInAdminPage> {
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  bool isAdmin = false; // Switch state
+  bool isAdmin = true; // Switch state
 
-  // Function to login as a regular user
-  Future<void> _loginAsUser() async {
+  Future<void> _loginAsAdmin() async {
     setState(() {
       _isLoading = true;
     });
 
-    String email = _emailController.text.trim();
+    String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       _showDialog('Error', 'Please fill in all fields.');
       setState(() {
         _isLoading = false;
@@ -38,17 +37,17 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Simulate successful login
+    // Simulate successful admin login
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', 'User');
-    await prefs.setString('email', email);
-    await prefs.setString('userType', 'user');
+    await prefs.setString('username', username);
+    await prefs.setString('email', 'admin@example.com');
+    await prefs.setString('userType', 'admin');
 
-    // Navigate to HomeAppPage
+    // Navigate to AdminProfilePage
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeAppPage()),
+      MaterialPageRoute(builder: (context) => AdminProfilePage()),
     );
 
     setState(() {
@@ -80,12 +79,12 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    isAdmin = false; // Ensure the switch starts on 'User'
+    isAdmin = true; // Ensure the switch starts on 'Admin'
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -96,7 +95,12 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Sign In', style: TextStyle(color: textColor)),
+        title: Text(
+          'Sign In as Admin',
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
@@ -110,11 +114,11 @@ class _LoginPageState extends State<LoginPage> {
                 setState(() {
                   isAdmin = val;
                 });
-                if (val) {
-                  // Navigate to SignInAdminPage when switched to Admin
+                if (!val) {
+                  // Navigate to LoginPage when switched to User
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => SignInAdminPage()),
+                    MaterialPageRoute(builder: (context) => LoginPage()),
                   );
                 }
               },
@@ -127,10 +131,10 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             SizedBox(height: 30),
-            // Email and Password fields
+            // Username and Password fields
             CustomInputField(
-              controller: _emailController,
-              label: 'Email',
+              controller: _usernameController,
+              label: 'Username',
             ),
             SizedBox(height: 20),
             CustomInputField(
@@ -143,35 +147,12 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading
                 ? CircularProgressIndicator()
                 : CustomButton(
-                    text: 'Sign In',
-                    onPressed: _loginAsUser,
+                    text: 'Sign In as Admin',
+                    onPressed: _loginAsAdmin,
                     backgroundColor: primaryColor,
                     textColor: Colors.white,
                   ),
-            SizedBox(height: 20),
-            // Sign Up option
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/signup');
-              },
-              child: RichText(
-                text: TextSpan(
-                  text: "Don't have an account? ",
-                  style: TextStyle(
-                    color: textColor,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Sign Up.',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // Option to switch back to User login is now handled by the switch
           ],
         ),
       ),
