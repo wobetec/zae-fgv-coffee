@@ -82,7 +82,15 @@ def product_favorite(request):
     product = get_object_or_404(models.Product, prod_id=prod_id)
     vending_machine = get_object_or_404(models.VendingMachine, vm_id=vm_id)
 
+    exists = models.Wishlist.objects.filter(
+        user=user, product=product, vending_machine=vending_machine
+    ).exists()
+
     if request.method == "POST":
+        if exists:
+            return Response(
+                {"error": "Product already in wishlist"}, status=status.HTTP_400_BAD_REQUEST
+            )
         wishlist = models.Wishlist.objects.create(
             user=user, product=product, vending_machine=vending_machine
         )
@@ -90,6 +98,10 @@ def product_favorite(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     if request.method == "DELETE":
+        if not exists:
+            return Response(
+                {"error": "Product not in wishlist"}, status=status.HTTP_400_BAD_REQUEST
+            )
         wishlist = get_object_or_404(
             models.Wishlist, user=user, product=product, vending_machine=vending_machine
         )

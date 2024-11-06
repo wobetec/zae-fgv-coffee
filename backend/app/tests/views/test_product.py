@@ -106,6 +106,19 @@ class ProductFavoriteTests(APITestCase):
         wishlist = models.Wishlist.objects.filter(user=self.user)
         self.assertEqual(len(wishlist), 6)
 
+    def test_add_product_favorite_already_exists(self):
+        item = self.wishlist[0]
+        data = {
+            "prod_id": item.product.prod_id,
+            "vm_id": item.vending_machine.vm_id
+        }
+        response = self.client.post(self.url, data, HTTP_AUTHORIZATION=f"Token {self.token.key}")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        wishlist = models.Wishlist.objects.filter(user=self.user)
+        self.assertEqual(len(wishlist), 5)
+
     def test_delete_product_favorite(self):
         item = self.wishlist[0]
         data = {
@@ -118,6 +131,20 @@ class ProductFavoriteTests(APITestCase):
 
         wishlist = models.Wishlist.objects.filter(user=self.user)
         self.assertEqual(len(wishlist), 4)
+    
+    def test_delete_product_favorite_not_exists(self):
+        product = self.products[0]
+        vending_machine = self.vending_machines[-1]
+        data = {
+            "prod_id": product.prod_id,
+            "vm_id": vending_machine.vm_id
+        }
+        response = self.client.delete(self.url, data, HTTP_AUTHORIZATION=f"Token {self.token.key}")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        wishlist = models.Wishlist.objects.filter(user=self.user)
+        self.assertEqual(len(wishlist), 5)
 
 
 class ProductRatingTests(APITestCase):

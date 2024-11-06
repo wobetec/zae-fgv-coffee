@@ -62,7 +62,7 @@ class OrderAllTests(APITestCase):
         self.assertIn("order_total", order)
         self.assertIn("user", order)
         self.assertIn("vending_machine", order)
-        self.assertIn("products", order)
+        self.assertIn("sells", order)
 
     def test_get_order_all_no_orders(self):
         models.Order.objects.all().delete()

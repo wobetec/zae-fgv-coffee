@@ -23,20 +23,6 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 @authentication_classes([])
 @permission_classes([])
 def login(request):
-    """
-    This view logs in a user and returns a token
-
-    request format:
-        {
-            "username": username,
-            "password": password
-        }
-
-    response format:
-        {
-            "token": token,
-        }
-    """
     if "username" not in request.data:
         return Response(
             {"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST
@@ -63,20 +49,6 @@ def login(request):
 @authentication_classes([])
 @permission_classes([])
 def login_support_user(request):
-    """
-    This view logs in a user and returns a token
-
-    request format:
-        {
-            "username": username,
-            "password": password
-        }
-
-    response format:
-        {
-            "token": token,
-        }
-    """
     if "username" not in request.data:
         return Response(
             {"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST
@@ -106,19 +78,6 @@ def login_support_user(request):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    """
-    This view logs out a user by deleting their token
-
-    request format:
-        {
-            "device_id": device_id
-        }
-
-    response format:
-        {
-            "success": "Successfully logged out"
-        }
-    """
     try:
         if "device_id" not in request.data:
             return Response(
@@ -144,19 +103,6 @@ def logout(request):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated, IsSupportUser])
 def logout_support_user(request):
-    """
-    This view logs out a user by deleting their token
-
-    request format:
-        {
-            "device_id": device_id
-        }
-
-    response format:
-        {
-            "success": "Successfully logged out"
-        }
-    """
     try:
         if "device_id" not in request.data:
             return Response(

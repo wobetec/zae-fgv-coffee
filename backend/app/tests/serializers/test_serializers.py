@@ -72,8 +72,8 @@ class SerializersTests(APITestCase):
         self.assertEqual(
             serializer.data["vending_machine"]["vm_id"], order.vending_machine.vm_id
         )
-        self.assertIn("products", serializer.data)
-        self.assertIsInstance(serializer.data["products"], list)
+        self.assertIn("sells", serializer.data)
+        self.assertIsInstance(serializer.data["sells"], list)
 
     def test_rating(self):
         rating = factories.RatingFactory()

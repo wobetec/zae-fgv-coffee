@@ -73,6 +73,13 @@ class ProductSerializer(serializers.ModelSerializer):
         return avg_rating
 
 
+class _SimpleProductSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = ['prod_id', 'prod_name', 'prod_description', 'prod_price']
+
+
 class SupportUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = SupportUser
@@ -93,24 +100,24 @@ class SellSerializer(serializers.ModelSerializer):
 
     def get_product(self, obj):
         product = Product.objects.get(prod_id=obj.product.prod_id)
-        serializer = ProductSerializer(product)
+        serializer = _SimpleProductSerializer(product)
         return serializer.data
 
 
 class OrderSerializer(serializers.ModelSerializer):
     vending_machine = serializers.SerializerMethodField()
-    products = serializers.SerializerMethodField()
+    sells = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
-        fields = ['order_id', 'order_total', 'order_date', 'user', 'vending_machine', 'products']
+        fields = ['order_id', 'order_total', 'order_date', 'user', 'vending_machine', 'sells']
 
     def get_vending_machine(self, obj):
         vending_machine = VendingMachine.objects.get(vm_id=obj.vending_machine.vm_id)
         serializer = VendingMachineSerializer(vending_machine)
         return serializer.data
 
-    def get_products(self, obj):
+    def get_sells(self, obj):
         sells = Sell.objects.filter(order=obj)
         serializer = SellSerializer(sells, many=True)
         return serializer.data
@@ -137,5 +144,5 @@ class WishlistSerializer(serializers.ModelSerializer):
 
     def get_product(self, obj):
         product = Product.objects.get(prod_id=obj.product.prod_id)
-        serializer = ProductSerializer(product)
+        serializer = _SimpleProductSerializer(product)
         return serializer.data
