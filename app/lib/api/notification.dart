@@ -26,5 +26,4 @@ class Notification {
         throw Exception('Failed to register device');
       });
   }
-
 }

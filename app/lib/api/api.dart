@@ -34,13 +34,13 @@ class BackendApi {
         }
     ) {
         if (!_initialized) {
-            Auth.initialize(endPointAuth);
-            Notification.initialize(endPointNotification);
-            Order.initialize(endPointOrder);
-            Product.initialize(endPointProduct);
-            Purchase.initialize(endPointPurchase);
-            Rating.initialize(endPointRating);
-            VendingMachine.initialize(endPointVendingMachine);
+            Auth.initialize(endPointAuth ?? EndPointAuth());
+            Notification.initialize(endPointNotification ?? EndPointNotification());
+            Order.initialize(endPointOrder ?? EndPointOrder());
+            Product.initialize(endPointProduct ?? EndPointProduct());
+            Purchase.initialize(endPointPurchase ?? EndPointPurchase());
+            Rating.initialize(endPointRating ?? EndPointRating());
+            VendingMachine.initialize(endPointVendingMachine ?? EndPointVendingMachine());
 
             _initialized = true;
         }

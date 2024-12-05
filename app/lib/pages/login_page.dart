@@ -1,13 +1,13 @@
 // lib/pages/login_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
 import 'main_screen.dart';
-import 'admin_profile_page.dart';
+
+import 'package:namer_app/api/auth.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _isHovering = false;
 
   // Function to login as a regular user
-  Future<void> _loginAsUser() async {
+  Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
@@ -46,11 +46,15 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Simulate successful login
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', username);
-    await prefs.setString('userType', 'user');
+    try {
+      await Auth.login(username, password, isAdmin? UserType.support : UserType.user);
+    } catch (e) {
+      _showDialog('Error', 'Failed to sign in. Please try again.');
+      // setState(() {
+      //   _isLoading = false;
+      // });
+      // return;
+    }
 
     // Navigate to MainScreen
     Navigator.pushReplacement(
@@ -63,39 +67,6 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  // Function to login as an admin
-  Future<void> _loginAsAdmin() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    String username = _adminUsernameController.text.trim();
-    String password = _adminPasswordController.text.trim();
-
-    if (username.isEmpty || password.isEmpty) {
-      _showDialog('Error', 'Please fill in all fields.');
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
-    // Simulate successful admin login
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', username);
-    await prefs.setString('userType', 'admin');
-
-    // Navigate to AdminProfilePage
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => AdminProfilePage()),
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
 
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
     showDialog(
@@ -210,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                       constraints: BoxConstraints(maxWidth: maxButtonWidth),
                       child: CustomButton(
                         text: isAdmin ? 'Sign In as Admin' : 'Sign In',
-                        onPressed: isAdmin ? _loginAsAdmin : _loginAsUser,
+                        onPressed: _login,
                         backgroundColor: primaryColor,
                         textColor: Colors.white,
                         width: double.infinity, // Button fills available width

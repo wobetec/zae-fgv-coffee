@@ -1,11 +1,12 @@
 // lib/pages/signup_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'constants.dart';
 import 'main_screen.dart';
+
+import 'package:namer_app/api/auth.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -22,8 +23,7 @@ class _SignupPageState extends State<SignupPage> {
   // For hover effect on "Sign In" text
   bool _isHovering = false;
 
-  // Simulated registration function
-  Future<void> _register() async {
+  Future<void> _signup() async {
     setState(() {
       _isLoading = true;
     });
@@ -40,12 +40,11 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    // Simulate successful registration
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', username);
-    await prefs.setString('email', email);
-    await prefs.setString('userType', 'user');
+    try {
+      await Auth.signup(username, email, password);
+    } catch (e) {
+      _showDialog('Error', 'Failed to sign up. Please try again.');
+    }
 
     // Navigate to MainScreen
     Navigator.pushReplacement(
@@ -148,7 +147,7 @@ class _SignupPageState extends State<SignupPage> {
                       constraints: BoxConstraints(maxWidth: maxButtonWidth),
                       child: CustomButton(
                         text: 'Sign Up',
-                        onPressed: _register,
+                        onPressed: _signup,
                         backgroundColor: primaryColor,
                         textColor: Colors.white,
                         width: double.infinity, // Button fills available width

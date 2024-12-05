@@ -1,11 +1,12 @@
 // lib/pages/main_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'home_app_page.dart';
 import 'user_page.dart';
 import 'my_favorite_page.dart';
 import 'constants.dart';
+
+import 'package:namer_app/api/auth.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -24,11 +25,13 @@ class _MainScreenState extends State<MainScreen> {
     _loadUserData();
   }
 
-  // Function to load user data
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLogged = await Auth.checkToken();
+    if (!isLogged) {
+      Navigator.pushReplacementNamed(context, '/');
+    }
     setState(() {
-      username = prefs.getString('username') ?? 'User';
+      username = Auth.getUsername()!;
     });
   }
 
