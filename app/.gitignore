@@ -1,3 +1,6 @@
+# Mocks
+*.mocks.dart
+
 # Flutter/Dart/Pub related
 .dart_tool/
 .flutter-plugins

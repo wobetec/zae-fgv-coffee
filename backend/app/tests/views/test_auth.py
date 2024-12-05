@@ -3,14 +3,14 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 from fcm_django.models import FCMDevice
-from app.models import SupportUser, User
+from app import models
 
 
-class TestLogin(APITestCase):
+class LoginTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:login")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
@@ -62,16 +62,16 @@ class TestLogin(APITestCase):
         self.assertEqual(response.data["error"], "Missing password")
 
 
-class TestLoginSupportUser(APITestCase):
+class LoginSupportUserTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:login_support_user")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
         )
-        self.support_user = SupportUser.objects.create(user=self.user)
+        self.support_user = models.SupportUser.objects.create(user=self.user)
 
     def test_login(self):
         data = {
@@ -119,11 +119,11 @@ class TestLoginSupportUser(APITestCase):
         self.assertEqual(response.data["error"], "Missing password")
 
 
-class TestLogout(APITestCase):
+class LogoutTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:logout")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
@@ -156,16 +156,16 @@ class TestLogout(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class TestLogoutSupportUser(APITestCase):
+class LogoutSupportUserTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:logout_support_user")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
         )
-        self.support_user = SupportUser.objects.create(user=self.user)
+        self.support_user = models.SupportUser.objects.create(user=self.user)
         self.token = Token.objects.create(user=self.user)
         self.device = FCMDevice.objects.create(
             device_id="1234567890",
@@ -176,7 +176,8 @@ class TestLogoutSupportUser(APITestCase):
     def test_logout(self):
         # Verify token
         response = self.client.get(
-            reverse("app:test_token_support_user"), HTTP_AUTHORIZATION=f"Token {self.token.key}"
+            reverse("app:test_token_support_user"),
+            HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -189,12 +190,13 @@ class TestLogoutSupportUser(APITestCase):
 
         # Verify token
         response = self.client.get(
-            reverse("app:test_token_support_user"), HTTP_AUTHORIZATION=f"Token {self.token.key}"
+            reverse("app:test_token_support_user"),
+            HTTP_AUTHORIZATION=f"Token {self.token.key}",
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class TestSignUp(APITestCase):
+class SignUpTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:signup")
@@ -238,11 +240,11 @@ class TestSignUp(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class TestTestToken(APITestCase):
+class TestTokenTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:test_token")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
@@ -264,16 +266,16 @@ class TestTestToken(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-class TestTestTokenSupportUser(APITestCase):
+class TestTokenSupportUserTests(APITestCase):
 
     def setUp(self):
         self.url = reverse("app:test_token_support_user")
-        self.user = User.objects.create_user(
+        self.user = models.User.objects.create_user(
             username="testuser",
             password="testpassword",
             email="testuser@email.com",
         )
-        self.support_user = SupportUser.objects.create(user=self.user)
+        self.support_user = models.SupportUser.objects.create(user=self.user)
         self.token = Token.objects.create(user=self.user)
 
     def test_test_token(self):
@@ -291,13 +293,11 @@ class TestTestTokenSupportUser(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_not_support_user(self):
-        user = User.objects.create_user(
+        user = models.User.objects.create_user(
             username="testuser2",
             password="testpassword",
             email="testuser@email.com",
         )
         token = Token.objects.create(user=user)
-        response = self.client.get(
-            self.url, HTTP_AUTHORIZATION=f"Token {token.key}"
-        )
+        response = self.client.get(self.url, HTTP_AUTHORIZATION=f"Token {token.key}")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

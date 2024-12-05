@@ -1,6 +1,7 @@
 """
 Views to handle user authentication
 """
+
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -22,30 +23,22 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 @authentication_classes([])
 @permission_classes([])
 def login(request):
-    """
-    This view logs in a user and returns a token
-
-    request format:
-        {
-            "username": username,
-            "password": password
-        }
-
-    response format:
-        {
-            "token": token,
-        }
-    """
     if "username" not in request.data:
-        return Response({"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     if "password" not in request.data:
-        return Response({"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     user = get_object_or_404(User, username=request.data["username"])
 
     if not user.check_password(request.data["password"]):
-        return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     token, created = Token.objects.get_or_create(user=user)
 
@@ -56,25 +49,15 @@ def login(request):
 @authentication_classes([])
 @permission_classes([])
 def login_support_user(request):
-    """
-    This view logs in a user and returns a token
-
-    request format:
-        {
-            "username": username,
-            "password": password
-        }
-
-    response format:
-        {
-            "token": token,
-        }
-    """
     if "username" not in request.data:
-        return Response({"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Missing username"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     if "password" not in request.data:
-        return Response({"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     user = get_object_or_404(User, username=request.data["username"])
 
@@ -82,7 +65,9 @@ def login_support_user(request):
         return Response({"error": "Invalid user"}, status=status.HTTP_400_BAD_REQUEST)
 
     if not user.check_password(request.data["password"]):
-        return Response({"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Invalid password"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     token, created = Token.objects.get_or_create(user=user)
 
@@ -93,22 +78,11 @@ def login_support_user(request):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    """
-    This view logs out a user by deleting their token
-
-    request format:
-        {
-            "device_id": device_id
-        }
-
-    response format:
-        {
-            "success": "Successfully logged out"
-        }
-    """
     try:
         if "device_id" not in request.data:
-            return Response({"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Delete device
         device = get_object_or_404(FCMDevice, device_id=request.data["device_id"])
@@ -118,7 +92,9 @@ def logout(request):
         token = get_object_or_404(Token, user=request.user)
         token.delete()
 
-        return Response({"success": "Successfully logged out"}, status=status.HTTP_200_OK)
+        return Response(
+            {"success": "Successfully logged out"}, status=status.HTTP_200_OK
+        )
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,22 +103,11 @@ def logout(request):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated, IsSupportUser])
 def logout_support_user(request):
-    """
-    This view logs out a user by deleting their token
-
-    request format:
-        {
-            "device_id": device_id
-        }
-
-    response format:
-        {
-            "success": "Successfully logged out"
-        }
-    """
     try:
         if "device_id" not in request.data:
-            return Response({"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Delete device
         device = get_object_or_404(FCMDevice, device_id=request.data["device_id"])
@@ -152,7 +117,9 @@ def logout_support_user(request):
         token = get_object_or_404(Token, user=request.user)
         token.delete()
 
-        return Response({"success": "Successfully logged out"}, status=status.HTTP_200_OK)
+        return Response(
+            {"success": "Successfully logged out"}, status=status.HTTP_200_OK
+        )
     except Token.DoesNotExist:
         return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -176,6 +143,10 @@ def signup(request):
             "token": token,
         }
     """
+    if "password" not in request.data:
+        return Response(
+            {"error": "Missing password"}, status=status.HTTP_400_BAD_REQUEST
+        )
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -183,7 +154,10 @@ def signup(request):
         user.set_password(request.data["password"])
         user.save()
         token = Token.objects.create(user=user)
-        return Response({"token": token.key, "user": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"token": token.key, "user": serializer.data},
+            status=status.HTTP_201_CREATED,
+        )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
