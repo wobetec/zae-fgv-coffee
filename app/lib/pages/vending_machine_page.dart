@@ -23,14 +23,14 @@ class _VendingMachinePageState extends State<VendingMachinePage> {
     _loadVendingMachines();
   }
 
-  // Função para carregar as vending machines que possuem o produto selecionado
+  // Function to load vending machines that have the selected product
   void _loadVendingMachines() {
-    // Dados de exemplo das vending machines
+    // Sample data for vending machines
     vendingMachines = List.generate(5, (index) {
       return {
         'id': index,
         'name': 'Vending Machine ${index + 1}',
-        'floor': 'Andar ${index + 1}',
+        'floor': 'Floor ${index + 1}',
         'product': widget.productData,
       };
     });
@@ -51,7 +51,7 @@ class _VendingMachinePageState extends State<VendingMachinePage> {
           },
         ),
         title: Text(
-          'Máquinas com ${product['title']}',
+          'Machines with ${product['title']}',
           style: TextStyle(
             fontSize: 20,
             color: const Color(0xFF232323),
@@ -68,7 +68,7 @@ class _VendingMachinePageState extends State<VendingMachinePage> {
             name: vendingMachine['name'],
             floor: vendingMachine['floor'],
             onTap: () {
-              // Navegar para a página do produto na vending machine selecionada
+              // Navigate to the product page for the selected vending machine
               Navigator.push(
                 context,
                 MaterialPageRoute(

@@ -16,38 +16,26 @@ class VendingMachineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: ListTile(
-          leading: Icon(
-            Icons.local_drink,
-            size: 50,
-            color: Colors.orange,
-          ),
-          title: Text(
-            name,
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF232323),
-              fontFamily: 'Roboto-SemiBold',
-            ),
-          ),
-          subtitle: Text(
-            floor,
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF80869A),
-              fontFamily: 'Roboto-Regular',
-            ),
-          ),
-          trailing: Icon(
-            Icons.arrow_forward_ios,
-            size: 16,
-            color: Colors.black54,
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        leading: Icon(Icons.local_drink, color: Colors.orange),
+        title: Text(
+          name,
+          style: TextStyle(
+            fontSize: 18,
+            fontFamily: 'Roboto-SemiBold',
           ),
         ),
+        subtitle: Text(
+          floor,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
       ),
     );
   }

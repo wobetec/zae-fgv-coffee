@@ -9,6 +9,7 @@ import 'components/product_image.dart';
 import 'components/star_rating.dart';
 import 'components/favorite_button.dart';
 import 'components/section.dart';
+import 'constants.dart';
 
 class ProductPage extends StatefulWidget {
   final Map<String, dynamic> productData;
@@ -121,8 +122,8 @@ class _ProductPageState extends State<ProductPage> {
                   // Seção de Informações Nutricionais
                   Section(
                     title: 'Nutritional Information',
-                    content:
-                        product['nutrition'] ?? 'Informações nutricionais aqui.',
+                    content: product['nutrition'] ??
+                        'Informações nutricionais aqui.',
                   ),
                 ],
               ),
@@ -155,6 +156,9 @@ class _ProductPageState extends State<ProductPage> {
               ),
             );
           },
+          backgroundColor:
+              primaryColor,
+          textColor: Colors.white,
         ),
       ),
       // Rodapé
@@ -164,7 +168,8 @@ class _ProductPageState extends State<ProductPage> {
           if (index == 0) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => HomeAppPage()),
+              MaterialPageRoute(
+                  builder: (context) => HomeAppPage(username: 'User')),
               (route) => false,
             );
           } else if (index == 1) {

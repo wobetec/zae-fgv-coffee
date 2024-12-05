@@ -7,12 +7,8 @@ class MyFavoritePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Implement the UI for My Favorites here
     return Scaffold(
-      appBar: AppBar(
-        title: Text('My Favorites'),
-        backgroundColor: Color(0xFFFF5722),
-      ),
+      backgroundColor: Color(0xFFE2E2E2),
       body: Center(
         child: Text('My Favorites Page'),
       ),

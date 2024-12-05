@@ -11,8 +11,18 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
+  // Map to keep track of selected reports using formatted date strings as keys
+  Map<String, bool> _selectedReports = {};
+
   @override
   Widget build(BuildContext context) {
+    // Generate a list of the last 7 dates without time
+    final List<DateTime> lastSevenDays = List.generate(7, (index) {
+      final date = DateTime.now().subtract(Duration(days: index));
+      // Normalize the date to midnight to ensure consistent comparison
+      return DateTime(date.year, date.month, date.day);
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -30,11 +40,11 @@ class _ReportsPageState extends State<ReportsPage> {
       ),
       body: Column(
         children: [
-          // Texto instrutivo abaixo do AppBar
+          // Instructional text below the AppBar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
-              'Select a day to generate the report.',
+              'Select days to include in the report.',
               style: TextStyle(
                 fontSize: 20,
                 color: textColor,
@@ -42,44 +52,81 @@ class _ReportsPageState extends State<ReportsPage> {
               ),
             ),
           ),
-          // Lista de relatórios
+          // List of reports
           Expanded(
             child: ListView.builder(
-              itemCount: 7, // Exemplo para os últimos 7 dias
+              itemCount: lastSevenDays.length,
               itemBuilder: (context, index) {
-                final day = DateTime.now().subtract(Duration(days: index));
+                final day = lastSevenDays[index];
+                final formattedDate = _formatDate(day);
+
+                final isSelected = _selectedReports[formattedDate] ?? false;
+
                 return ReportListItem(
                   date: day,
-                  onTap: () {
-                    // Lógica ao selecionar um relatório
-                    // Exemplo: navegar para uma página de detalhes do relatório
+                  formattedDate: formattedDate,
+                  isSelected: isSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _selectedReports[formattedDate] = value ?? false;
+                    });
                   },
                 );
               },
             ),
           ),
-          // Botão "Generate Report"
+          // "Generate Report" Button
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: GenerateReportButton(
               onPressed: () {
-                // Simula a geração do relatório e imprime a mensagem no terminal
-                print('O relatório foi gerado');
+                // Get the list of selected dates
+                final selectedDates = _selectedReports.entries
+                    .where((entry) => entry.value)
+                    .map((entry) => entry.key)
+                    .toList();
 
-                // Exibe uma mensagem de confirmação ao usuário
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Relatório Gerado'),
-                    content: Text('O relatório foi gerado com sucesso.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
+                if (selectedDates.isEmpty) {
+                  // Show a message if no dates are selected
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('No Dates Selected'),
+                      content:
+                          Text('Please select at least one day to generate a report.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  // Simulate report generation and show confirmation
+                  print('Generating report for dates: $selectedDates');
+
+                  // Show a confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text('Report Generated'),
+                      content: Text(
+                          'The report for the following dates has been generated:\n${selectedDates.join(', ')}'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  // Clear the selections
+                  setState(() {
+                    _selectedReports.clear();
+                  });
+                }
               },
             ),
           ),
@@ -87,21 +134,38 @@ class _ReportsPageState extends State<ReportsPage> {
       ),
     );
   }
+
+  // Helper function to format the date
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
 }
 
-// Componente para cada item da lista de relatórios
+// Updated ReportListItem to include a Checkbox
 class ReportListItem extends StatelessWidget {
   final DateTime date;
-  final VoidCallback onTap;
+  final String formattedDate;
+  final bool isSelected;
+  final ValueChanged<bool?> onChanged;
 
-  const ReportListItem({Key? key, required this.date, required this.onTap})
-      : super(key: key);
+  const ReportListItem({
+    Key? key,
+    required this.date,
+    required this.formattedDate,
+    required this.isSelected,
+    required this.onChanged,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = '${date.day}/${date.month}/${date.year}';
     return ListTile(
-      leading: Icon(Icons.insert_drive_file, color: primaryColor),
+      leading: Checkbox(
+        value: isSelected,
+        onChanged: onChanged,
+        activeColor: primaryColor,
+      ),
       title: Text(
         'Report for $formattedDate',
         style: TextStyle(
@@ -118,13 +182,15 @@ class ReportListItem extends StatelessWidget {
           fontFamily: 'Roboto-Regular',
         ),
       ),
-      trailing: Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 16),
-      onTap: onTap,
+      onTap: () {
+        // Toggle selection when the list item is tapped
+        onChanged(!isSelected);
+      },
     );
   }
 }
 
-// Componente para o botão "Generate Report"
+// GenerateReportButton remains the same
 class GenerateReportButton extends StatelessWidget {
   final VoidCallback onPressed;
 
@@ -146,7 +212,7 @@ class GenerateReportButton extends StatelessWidget {
         'Generate Report',
         style: TextStyle(
           fontSize: 14,
-          color: textColor,
+          color: Colors.white, // Changed text color to white for better contrast
           fontFamily: 'Roboto-Medium',
         ),
       ),

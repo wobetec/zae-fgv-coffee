@@ -6,8 +6,8 @@ import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
-import 'home_app_page.dart';
-import 'signin_adm_page.dart';
+import 'main_screen.dart';
+import 'admin_profile_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,11 +15,19 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  // Controllers for user login
+  final _userUsernameController = TextEditingController();
+  final _userPasswordController = TextEditingController();
+
+  // Controllers for admin login
+  final _adminUsernameController = TextEditingController();
+  final _adminPasswordController = TextEditingController();
 
   bool _isLoading = false;
   bool isAdmin = false; // Switch state
+
+  // For hover effect on "Sign Up" text
+  bool _isHovering = false;
 
   // Function to login as a regular user
   Future<void> _loginAsUser() async {
@@ -27,10 +35,10 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
+    String username = _userUsernameController.text.trim();
+    String password = _userPasswordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       _showDialog('Error', 'Please fill in all fields.');
       setState(() {
         _isLoading = false;
@@ -41,14 +49,47 @@ class _LoginPageState extends State<LoginPage> {
     // Simulate successful login
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', 'User');
-    await prefs.setString('email', email);
+    await prefs.setString('username', username);
     await prefs.setString('userType', 'user');
 
-    // Navigate to HomeAppPage
+    // Navigate to MainScreen
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => HomeAppPage()),
+      MaterialPageRoute(builder: (context) => MainScreen()),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  // Function to login as an admin
+  Future<void> _loginAsAdmin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String username = _adminUsernameController.text.trim();
+    String password = _adminPasswordController.text.trim();
+
+    if (username.isEmpty || password.isEmpty) {
+      _showDialog('Error', 'Please fill in all fields.');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Simulate successful admin login
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('authToken', 'dummy_token');
+    await prefs.setString('username', username);
+    await prefs.setString('userType', 'admin');
+
+    // Navigate to AdminProfilePage
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => AdminProfilePage()),
     );
 
     setState(() {
@@ -78,25 +119,27 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    isAdmin = false; // Ensure the switch starts on 'User'
-  }
-
-  @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _userUsernameController.dispose();
+    _userPasswordController.dispose();
+    _adminUsernameController.dispose();
+    _adminPasswordController.dispose();
     super.dispose();
   }
 
-  // Updated build method
   @override
   Widget build(BuildContext context) {
+    // Define maximum widths for input fields and buttons
+    double maxInputFieldWidth = 800.0; // Input fields max width
+    double maxButtonWidth = 500.0;     // Buttons max width
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Sign In', style: TextStyle(color: textColor)),
+        title: Text(
+          isAdmin ? 'Sign In as Admin' : 'Sign In',
+          style: TextStyle(color: textColor),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
@@ -110,69 +153,119 @@ class _LoginPageState extends State<LoginPage> {
                 setState(() {
                   isAdmin = val;
                 });
-                if (val) {
-                  // Navigate to SignInAdminPage when switched to Admin
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInAdminPage()),
-                  );
-                }
               },
             ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            // Email and Password fields
-            CustomInputField(
-              controller: _emailController,
-              label: 'Email',
-            ),
-            SizedBox(height: 20),
-            CustomInputField(
-              controller: _passwordController,
-              label: 'Password',
-              obscureText: true,
-            ),
-            SizedBox(height: 30),
-            // Sign In button
-            _isLoading
-                ? CircularProgressIndicator()
-                : CustomButton(
-                    text: 'Sign In',
-                    onPressed: _loginAsUser,
-                    backgroundColor: primaryColor,
-                    textColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView( // Handles overflow on smaller screens
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 30),
+              // Conditional rendering based on isAdmin
+              if (isAdmin) ...[
+                // Admin login form
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: CustomInputField(
+                    controller: _adminUsernameController,
+                    label: 'Username',
                   ),
-            SizedBox(height: 20),
-            // Sign Up option
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/signup');
-              },
-              child: RichText(
-                text: TextSpan(
-                  text: "Don't have an account? ",
-                  style: TextStyle(
-                    color: textColor,
+                ),
+                SizedBox(height: 20),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: CustomInputField(
+                    controller: _adminPasswordController,
+                    label: 'Password',
+                    obscureText: true,
                   ),
-                  children: [
-                    TextSpan(
-                      text: 'Sign Up.',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
+                ),
+              ] else ...[
+                // User login form
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: CustomInputField(
+                    controller: _userUsernameController,
+                    label: 'Username',
+                  ),
+                ),
+                SizedBox(height: 20),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: CustomInputField(
+                    controller: _userPasswordController,
+                    label: 'Password',
+                    obscureText: true,
+                  ),
+                ),
+              ],
+              SizedBox(height: 30),
+              // Sign In button
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxButtonWidth),
+                      child: CustomButton(
+                        text: isAdmin ? 'Sign In as Admin' : 'Sign In',
+                        onPressed: isAdmin ? _loginAsAdmin : _loginAsUser,
+                        backgroundColor: primaryColor,
+                        textColor: Colors.white,
+                        width: double.infinity, // Button fills available width
                       ),
                     ),
-                  ],
+              if (!isAdmin) ...[
+                SizedBox(height: 20),
+                // Sign Up option for users
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: "Don't have an account? ",
+                      style: TextStyle(
+                        color: textColor,
+                      ),
+                      children: [
+                        WidgetSpan(
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            onEnter: (_) {
+                              setState(() {
+                                _isHovering = true;
+                              });
+                            },
+                            onExit: (_) {
+                              setState(() {
+                                _isHovering = false;
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/signup');
+                              },
+                              child: Text(
+                                'Sign Up.',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: _isHovering
+                                      ? TextDecoration.underline
+                                      : TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
     );
