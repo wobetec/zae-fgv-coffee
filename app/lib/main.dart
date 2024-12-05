@@ -1,7 +1,6 @@
 // lib/main.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/home_page.dart';
 import 'pages/login_page.dart';
 import 'pages/signup_page.dart';
@@ -15,33 +14,20 @@ import 'pages/main_screen.dart';
 import 'pages/loading_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
+
+import 'package:namer_app/api/api.dart';
+import 'package:namer_app/fcm/fcm.dart';
+import 'package:namer_app/api/auth.dart';
+
 
 Future<void> main() async {
   // Load environment variables from the .env file
   await dotenv.load(fileName: path.join('.env'));
 
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // Request permission for notifications
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    print('User granted permission for notifications.');
-  } else {
-    print('User did not grant permission for notifications.');
-  }
+  await FCM.initialize();
+  await BackendApi.initialize();
 
   runApp(MyApp());
 }
@@ -50,15 +36,12 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   // Method to check login status and user type
-  Future<String> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
-    String? userType = prefs.getString('userType');
-    if (token != null && userType != null) {
-      return userType;
-    } else {
-      return 'none';
+  Future<UserType?> _checkLoginStatus() async {
+    bool isLogged = await Auth.checkToken();
+    if (!isLogged) {
+      return null;
     }
+    return Auth.getUserType();
   }
 
   @override
@@ -69,7 +52,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
       ),
-      home: FutureBuilder<String>(
+      home: FutureBuilder<UserType?>(
         future: _checkLoginStatus(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -78,10 +61,10 @@ class MyApp extends StatelessWidget {
               body: Center(child: CircularProgressIndicator()),
             );
           } else {
-            if (snapshot.data == 'user') {
+            if (snapshot.data == UserType.user) {
               // User is logged in as a regular user, navigate to MainScreen
               return MainScreen();
-            } else if (snapshot.data == 'admin') {
+            } else if (snapshot.data == UserType.support) {
               // User is logged in as admin, navigate to AdminProfilePage
               return AdminProfilePage();
             } else {

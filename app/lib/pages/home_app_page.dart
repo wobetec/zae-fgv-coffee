@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'components/product_card.dart';
 import 'vending_machine_page.dart';
 import 'constants.dart';
+import 'package:namer_app/api/product.dart';
 
 class HomeAppPage extends StatefulWidget {
   final String username;
@@ -15,16 +16,20 @@ class HomeAppPage extends StatefulWidget {
 }
 
 class _HomeAppPageState extends State<HomeAppPage> {
-  // Sample data for the product list
-  final List<Map<String, dynamic>> _products = List.generate(10, (index) {
-    return {
-      'title': 'Product ${index + 1}',
-      'subtitle': 'Category ${index + 1}',
-      'imageUrl': '', // Replace with real URLs if available
-      'rating': 4.5, // Sample rating
-      'vendingMachineId': index % 3, // Sample vending machine ID
-    };
-  });
+  List<dynamic> _products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    List<dynamic> products = await Product.getProducts();
+    setState(() {
+      _products = products;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +39,9 @@ class _HomeAppPageState extends State<HomeAppPage> {
       itemBuilder: (context, index) {
         final product = _products[index];
         return ProductCard(
-          title: product['title'],
-          subtitle: product['subtitle'],
-          imageUrl: product['imageUrl'],
+          title: product['prod_name'],
+          subtitle: product['prod_description'],
+          imageUrl: '',
           rating: product['rating'],
           onTap: () {
             // Navigate to the vending machine page
