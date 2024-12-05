@@ -1,31 +1,39 @@
-# Django Backend
+# Backend
 
-## Installation
-Using python 3.12.4. Install the required packages using the following command:
+## Execution
+
+### Locally
+
+Go to the backend directory
+
+    cd backend
+
+Using python 3.12.4. Install the required packages
 
     pip install -r requirements.txt
 
-## Database setup
-To setup the database, use the following command:
+Setup the database
 
+    python manage.py makemigrations
     python manage.py migrate
 
-## Creating a superuser
-To create a superuser, use the following command:
+Create a superuser (is required to access the admin panel)
 
     python manage.py createsuperuser
 
-## Populating the database
-To populate the database with the initial data, use the following command:
+Populate the local database with the initial data
 
     python manage.py populate
 
-## Running the server
-To run the server, use the following command:
+Run the server
 
     python manage.py runserver
 
-## Running the tests
-To run the tests, use the following command:
+#### Running the tests
+To run the tests use:
 
     python manage.py test ./app/tests
+
+### Database
+
+By default, the database is SQLite in local execution. In production we are using MySQL hosted on Google Cloud. For security reasons, the database credentials are not available in this repository.

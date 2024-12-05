@@ -1,31 +1,34 @@
-# flutter_application_1
+# Frontend
 
-A new Flutter project.
+## Execution
 
-## Getting Started
+### Locally
 
-This project is a starting point for a Flutter application.
+Go to the app directory
 
-A few resources to get you started if this is your first Flutter project:
+    cd app
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Install the required packages
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+    flutter pub get
 
-## Tests
+Run the app
+    
+    flutter run
 
-### Create mockito mock
+Here you'll be asked for the platform, just choose the one you want to run the app on.
+
+### Tests
+
+First, you need to create the mockito mock
 
     dart run build_runner build
 
-### Run tests
+Run the tests
 
-    flutter test .\test
+    flutter test ./test
 
-### Lógica de Programação entre as Telas
+## Lógica de Programação entre as Telas
 
 Este aplicativo foi desenvolvido para atender tanto usuários comuns quanto membros da equipe de suporte (anteriormente referidos como administradores). A interface é intuitiva e permite que os usuários naveguem facilmente entre as diferentes funcionalidades disponíveis para cada tipo de usuário.
 
