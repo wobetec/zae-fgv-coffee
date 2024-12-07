@@ -3,7 +3,7 @@ Define the URL patterns for the app application.
 """
 from django.urls import re_path
 
-from .views import product, vending_machine, rating, order
+from .views import product, vending_machine, rating, order, simple_report
 from .views import auth, notification, purchase
 
 app_name = 'app'
@@ -40,4 +40,7 @@ urlpatterns = [
 
     # Purchase
     re_path(r"^purchase$", purchase.purchase, name="purchase"),
+
+    # Report
+    re_path(r"^report$", simple_report.daily_report, name="daily_report"),
 ]
