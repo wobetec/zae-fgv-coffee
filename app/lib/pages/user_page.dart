@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/user_info_card.dart';
 import 'components/menu_option.dart';
-import 'login_page.dart';
 import 'order_history_page.dart';
 import 'constants.dart';
+
+import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/fcm/fcm.dart';
+import 'home_page.dart';
+
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -24,6 +28,28 @@ class _UserPageState extends State<UserPage> {
     _loadUserData();
   }
 
+  
+  void _showDialog(String title, String message, {VoidCallback? onOk}) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (onOk != null) {
+                onOk();
+              }
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -34,13 +60,16 @@ class _UserPageState extends State<UserPage> {
 
   // Function to handle sign out
   void _signOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    // Navigate to LoginPage
-    Navigator.pushAndRemoveUntil(
+    try {
+      await Auth.logout(FCM.deviceId!);
+    } catch (e) {
+      _showDialog('Error', 'Failed to logout. Please try again.');
+      return;
+    } 
+
+    Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      (route) => false,
+      MaterialPageRoute(builder: (context) => HomePage()),
     );
   }
 

@@ -32,7 +32,7 @@ void main(){
   group("Test logout", (){
     test("with token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
-      when(endPointAuth.logout("123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
+      when(endPointAuth.logout("123", "123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
       // login
@@ -40,14 +40,14 @@ void main(){
       Auth.setUserType(UserType.user);
 
       //logout
-      await Auth.logout();
+      await Auth.logout("123");
       expect(Auth.hasToken(), false);
     });
 
     test("without token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
       Auth.initialize(endPointAuth, force: true);
-      expect(() async => await Auth.logout(), throwsException);
+      expect(() async => await Auth.logout("123"), throwsException);
     });
   });
 
@@ -101,7 +101,7 @@ void main(){
   group("Test support logout", (){
     test("with token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
-      when(endPointAuth.supportLogout("123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
+      when(endPointAuth.supportLogout("123", "123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
       // login
@@ -109,14 +109,14 @@ void main(){
       Auth.setUserType(UserType.support);
 
       //logout
-      await Auth.logout();
+      await Auth.logout("123");
       expect(Auth.hasToken(), false);
     });
 
     test("without token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
       Auth.initialize(endPointAuth, force: true);
-      expect(() async => await Auth.logout(), throwsException);
+      expect(() async => await Auth.logout("123"), throwsException);
     });
   });
 

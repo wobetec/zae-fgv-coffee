@@ -8,6 +8,7 @@ import 'package:namer_app/firebase_options.dart';
 class FCM {
   static String? _deviceId;
   static String? _registrationId;
+  static String? _deviceType;
 
   static Future<void> initialize() async {
     await Firebase.initializeApp(
@@ -32,6 +33,7 @@ class FCM {
 
     // Set device ID
     _deviceId = await DeviceId.getId();
+    _deviceType = DeviceId.getDeviceType();
 
     // Set FCM token
     _registrationId = await FirebaseMessaging.instance.getToken(vapidKey: Config.vapidKey);
@@ -39,4 +41,5 @@ class FCM {
 
   static String? get deviceId => _deviceId;
   static String? get registrationId => _registrationId;
+  static String? get deviceType => _deviceType;
 }

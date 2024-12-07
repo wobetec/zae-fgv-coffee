@@ -8,6 +8,8 @@ import 'constants.dart';
 import 'main_screen.dart';
 
 import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/api/notification.dart' as my_notification;
+import 'package:namer_app/fcm/fcm.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -48,13 +50,20 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await Auth.login(username, password, isAdmin? UserType.support : UserType.user);
+      print('Logged OK');
+      await my_notification.Notification.registerDevice(
+        FCM.registrationId!,
+        FCM.deviceType!,
+        FCM.deviceId!,
+      );
+      print('Notification OK');
     } catch (e) {
       _showDialog('Error', 'Failed to sign in. Please try again.');
-      // setState(() {
-      //   _isLoading = false;
-      // });
-      // return;
-    }
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    } 
 
     // Navigate to MainScreen
     Navigator.pushReplacement(

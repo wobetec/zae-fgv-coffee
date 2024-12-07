@@ -5,6 +5,7 @@ import 'components/product_card.dart';
 import 'vending_machine_page.dart';
 import 'constants.dart';
 import 'package:namer_app/api/product.dart';
+import 'package:namer_app/api/vending_machine.dart';
 
 class HomeAppPage extends StatefulWidget {
   final String username;
@@ -26,6 +27,9 @@ class _HomeAppPageState extends State<HomeAppPage> {
 
   Future<void> _loadProducts() async {
     List<dynamic> products = await Product.getProducts();
+    List<dynamic> vending_machines = await VendingMachine.getVendingMachines();
+    print(vending_machines);
+
     setState(() {
       _products = products;
     });

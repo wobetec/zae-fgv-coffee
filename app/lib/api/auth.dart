@@ -52,10 +52,10 @@ class Auth {
     _userType = userType;
   }
 
-  static Future<void> logout() async {
+  static Future<void> logout(String deviceId) async {
     if (_token != null) {
       if (_userType == UserType.user) {
-        await _endPointAuth!.logout(_token!)
+        await _endPointAuth!.logout(_token!, deviceId)
           .then((response) {
             if (response.statusCode == 200) {
               _token = null;
@@ -68,7 +68,7 @@ class Auth {
             throw Exception('Failed to logout');
           });
       } else if (_userType == UserType.support) {
-        await _endPointAuth!.supportLogout(_token!)
+        await _endPointAuth!.supportLogout(_token!, deviceId)
           .then((response) {
             if (response.statusCode == 200) {
               _token = null;

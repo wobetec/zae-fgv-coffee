@@ -46,16 +46,29 @@ def notify_out_of_stock_favorite_products(zero_stocks):
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
 def register_device(request):
-    serializer = FCMDeviceSerializer(data=request.data)
-    if serializer.is_valid():
-        FCMDevice.objects.filter(device_id=request.data["device_id"]).delete()
-        device, created = FCMDevice.objects.get_or_create(
-            user=request.user,
-            device_id=request.data["device_id"],
-            defaults={
-                "type": request.data["type"],
-                "registration_id": request.data["registration_id"],
-            },
+    if "device_id" not in request.data:
+        return Response(
+            {"error": "Missing device_id"}, status=status.HTTP_400_BAD_REQUEST
         )
-        return Response({"created": created}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    if "registration_id" not in request.data:
+        return Response(
+            {"error": "Missing registration_id"}, status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if "type" not in request.data:
+        return Response(
+            {"error": "Missing type"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    FCMDevice.objects.filter(device_id=request.data["device_id"]).delete()
+    device, created = FCMDevice.objects.get_or_create(
+        user=request.user,
+        device_id=request.data["device_id"],
+        defaults={
+            "type": request.data["type"],
+            "registration_id": request.data["registration_id"],
+        },
+    )
+    return Response({"created": created}, status=status.HTTP_201_CREATED)
+
