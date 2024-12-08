@@ -5,17 +5,33 @@ Views to handle product information and operations
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-
 from rest_framework import status
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
-from app.views.notification import notify_out_of_stock_favorite_products
-
+from app.views.notification import ZeroStockFavoriteProductsObserver
 from app import models
+from app.utils.observer import Subject, Observer
+
+
+class ZeroStockPublisher(Subject):
+    _observers: list[Observer] = []
+
+    def attach(self, observer: Observer) -> None:
+        self._observers.append(observer)
+        print(self._observers)
+
+    def detach(self, observer: Observer) -> None:
+        self._observers.remove(observer)
+
+    def notify(self, zero_stocks: list) -> None:
+        for observer in self._observers:
+            observer.update(zero_stocks)
+
+
+zero_stock_publisher = ZeroStockPublisher()
+zero_stock_publisher.attach(ZeroStockFavoriteProductsObserver())
 
 
 @api_view(["POST"])
@@ -85,7 +101,7 @@ def purchase(request):
                 zero_stock.append(stock_obj)
 
         if zero_stock:
-            notify_out_of_stock_favorite_products(zero_stock)
+            zero_stock_publisher.notify(zero_stock)
 
         return Response({"success": "Purchase successful"}, status=status.HTTP_200_OK)
 
