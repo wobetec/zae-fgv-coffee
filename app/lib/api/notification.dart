@@ -2,9 +2,17 @@ import 'auth.dart';
 import 'endpoints/endpoint_notification.dart';
 
 class Notification {
-  static EndPointNotification? _endPointNotification;
+  EndPointNotification? _endPointNotification;
 
-  static initialize(EndPointNotification? endPointNotification, {bool force = false}) {
+  Notification._privateConstructor();
+
+  static final Notification _instance = Notification._privateConstructor();
+
+  factory Notification() {
+    return _instance;
+  }
+
+  initialize(EndPointNotification? endPointNotification, {bool force = false}) {
     if (_endPointNotification == null || force) {
       _endPointNotification = endPointNotification;
     } else {
@@ -12,11 +20,12 @@ class Notification {
     }
   }
 
-  static Future<void> registerDevice(String registrationId, String type, String deviceId) async {
-    if (!Auth.hasToken()) {
+  Future<void> registerDevice(String registrationId, String type, String deviceId) async {
+    Auth auth = Auth();
+    if (!auth.hasToken()) {
       throw Exception('No token');
     }
-    await _endPointNotification!.registerDevice(Auth.getToken()!, registrationId, type, deviceId)
+    await _endPointNotification!.registerDevice(auth.getToken()!, registrationId, type, deviceId)
       .then((response) {
         if (response.statusCode != 201) {
           throw Exception('Failed to register device');

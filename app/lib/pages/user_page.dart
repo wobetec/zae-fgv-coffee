@@ -51,15 +51,19 @@ class _UserPageState extends State<UserPage> {
 
   // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
+    Auth auth = Auth();
     setState(() {
-      username = Auth.getUsername() ?? 'User';
+      username = auth.getUsername() ?? 'User';
     });
   }
 
   // Function to handle sign out
   void _signOut() async {
     try {
-      await Auth.logout(FCM.deviceId!);
+      Auth auth = Auth();
+      FCM fcm = FCM();
+      await auth.logout(fcm.deviceId!);
+      auth.deleteState();
     } catch (e) {
       _showDialog('Error', 'Failed to logout. Please try again.');
       return;

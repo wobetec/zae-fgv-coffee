@@ -42,15 +42,19 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      await Auth.login(
+      Auth auth = Auth();
+      await auth.login(
         username, 
         password, 
         isAdmin ? UserType.support : UserType.user
       );
-      await my_notification.Notification.registerDevice(
-        FCM.registrationId!,
-        FCM.deviceType!,
-        FCM.deviceId!,
+      auth.saveState();
+      my_notification.Notification notification = my_notification.Notification();
+      FCM fcm = FCM();
+      await notification.registerDevice(
+        fcm.registrationId!,
+        fcm.deviceType!,
+        fcm.deviceId!,
       );
     } catch (e) {
       _showDialog('Error', 'Failed to sign in. Please try again.');

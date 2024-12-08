@@ -26,12 +26,13 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadUserData() async {
-    bool isLogged = await Auth.checkToken();
+    Auth auth = Auth();
+    bool isLogged = await auth.checkToken();
     if (!isLogged) {
       Navigator.pushReplacementNamed(context, '/');
     }
     setState(() {
-      username = Auth.getUsername()!;
+      username = auth.getUsername()!;
     });
   }
 

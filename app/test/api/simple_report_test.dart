@@ -13,18 +13,21 @@ import 'simple_report_test.mocks.dart';
 
 @GenerateMocks([EndPointSimpleReport])
 void main(){
+  Auth auth = Auth();
+  SimpleReport simpleReport = SimpleReport();
+
   group("Test getSimpleReport", (){
     test("Get report with correct token", () async {
       EndPointSimpleReport endPointSimpleReport = MockEndPointSimpleReport();
       when(endPointSimpleReport.getSimpleReport("123", "2024-10-12")).thenAnswer((_) async => Response('{"date": "2024-10-12", "content": "html"}', 200));
 
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Auth.setUserType(UserType.support);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      auth.setUserType(UserType.support);
 
-      SimpleReport.initialize(endPointSimpleReport, force: true);
+      simpleReport.initialize(endPointSimpleReport, force: true);
 
-      dynamic report = await SimpleReport.getSimpleReport("2024-10-12");
+      dynamic report = await simpleReport.getSimpleReport("2024-10-12");
 
       expect(report, {"date": "2024-10-12", "content": "html"});
     });
