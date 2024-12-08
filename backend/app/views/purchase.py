@@ -64,7 +64,7 @@ def purchase(request):
             products.append((product_obj, stock_obj, quantity))
 
         order = models.Order.objects.create(
-            user=user, vending_machine=vending_machine, order_total=0
+            user=user, vending_machine=vending_machine, order_total=0,
         )
         total = 0
         for product_obj, stock_obj, quantity in products:
