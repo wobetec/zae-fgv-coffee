@@ -1,125 +1,33 @@
+// lib/pages/user_page.dart
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config.dart'; // Importa a configuração com a baseUrl
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:android_id/android_id.dart';
+import 'components/user_info_card.dart';
+import 'components/menu_option.dart';
+import 'order_history_page.dart';
+import 'constants.dart';
+
+import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/fcm/fcm.dart';
+import 'home_page.dart';
+
 
 class UserPage extends StatefulWidget {
+  const UserPage({Key? key}) : super(key: key);
+
   @override
-  State<UserPage> createState() => _UserPageState();
+  _UserPageState createState() => _UserPageState();
 }
 
 class _UserPageState extends State<UserPage> {
-  String _username = '';
-  bool _isLoading = true; // Indicador de carregamento
-  String? _fcmToken;
+  String username = '';
 
-  // Método para buscar os dados do usuário
-  Future<void> _fetchUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
-    String? fcmToken = await FirebaseMessaging.instance.getToken(vapidKey: Config.vapidKey);
-    setState(() {
-      _fcmToken = fcmToken;
-      print('Token FCM: $_fcmToken');
-    });
-
-    const androidIdPlugin = AndroidId();
-    final String? androidId = await androidIdPlugin.getId();
-
-    final responseRegister = await http.post(
-      Uri.parse('${Config.baseUrl}/notification/register_device'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Token $token',
-      },
-      body: json.encode({'device_id': androidId, 'registration_id': fcmToken, 'type': 'android'}),
-    );
-    print('ResponseRegister Body: ${responseRegister.body}');
-
-    if (token == null) {
-      // Token não encontrado, redireciona para o login após o frame atual
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/login');
-      });
-      return;
-    }
-
-    try {
-      // Envia a requisição GET para verificar o token
-      final response = await http.get(
-        Uri.parse('${Config.baseUrl}/auth/test_token'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Token $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        var responseData = json.decode(response.body);
-        setState(() {
-          _username = responseData['username'] ?? 'Usuário';
-          _isLoading = false; // Oculta o indicador de carregamento
-        });
-      } else {
-        // Token inválido ou expirado
-        setState(() {
-          _isLoading = false; // Oculta o indicador de carregamento
-        });
-        _showDialog('Erro', 'Sessão expirada. Faça login novamente.', onOk: () {
-          _logout();
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
-      });
-      _showDialog('Erro', 'Ocorreu um erro. Tente novamente.');
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
   }
 
-  // Método para realizar o logout com confirmação
-  void _logout() {
-    _showConfirmationDialog();
-  }
-
-  void _performLogout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('authToken');
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
-  }
-
-  // Método para exibir o diálogo de confirmação de logout
-  void _showConfirmationDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text('Confirmação'),
-        content: Text('Deseja realmente sair?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Fecha o diálogo
-            },
-            child: Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Fecha o diálogo
-              _performLogout(); // Realiza o logout
-            },
-            child: Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Método para exibir diálogos de erro ou mensagem
+  
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
     showDialog(
       context: context,
@@ -141,33 +49,72 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserData(); // Busca os dados do usuário ao iniciar a página
+  // Function to load user data from SharedPreferences
+  Future<void> _loadUserData() async {
+    setState(() {
+      username = Auth.getUsername() ?? 'User';
+    });
+  }
+
+  // Function to handle sign out
+  void _signOut() async {
+    try {
+      await Auth.logout(FCM.deviceId!);
+    } catch (e) {
+      _showDialog('Error', 'Failed to logout. Please try again.');
+      return;
+    } 
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Página do Usuário'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: _logout,
-          ),
-        ],
-      ),
-      body: Center(
-        child: _isLoading
-            ? CircularProgressIndicator()
-            : Text(
-                'Bem-vindo, $_username!',
-                style: TextStyle(fontSize: 24),
+    // Define colors
+    final cardColor = Color(0xFFE2E2E2);
+
+    return ListView(
+      key: PageStorageKey('UserPage'),
+      children: [
+        // User Info Card
+        UserInfoCard(
+          username: username,
+          textColor: textColor,
+          cardColor: cardColor,
+        ),
+        // Menu Options
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              Divider(color: cardColor),
+              MenuOption(
+                icon: Icons.history,
+                title: 'Order History',
+                onTap: () {
+                  // Navigate to OrderHistoryPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => OrderHistoryPage()),
+                  );
+                },
               ),
-      ),
+              Divider(color: cardColor),
+              // Removed 'My Favorites' MenuOption
+              MenuOption(
+                icon: Icons.logout,
+                title: 'Sign Out',
+                onTap: _signOut,
+              ),
+              Divider(color: cardColor),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

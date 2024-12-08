@@ -1,75 +1,75 @@
-// main.dart
+// lib/main.dart
 
 import 'package:flutter/material.dart';
-import 'pages/signup_page.dart';
+import 'pages/home_page.dart';
 import 'pages/login_page.dart';
+import 'pages/signup_page.dart';
 import 'pages/user_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/home_app_page.dart';
+import 'pages/my_favorite_page.dart';
+import 'pages/admin_profile_page.dart';
+import 'pages/reports_page.dart';
+import 'pages/constants.dart';
+import 'pages/main_screen.dart';
+import 'pages/loading_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
+import 'package:namer_app/api/api.dart';
+import 'package:namer_app/fcm/fcm.dart';
+import 'package:namer_app/api/auth.dart';
+
 
 Future<void> main() async {
+  // Load environment variables from the .env file
   await dotenv.load(fileName: path.join('.env'));
-  await Firebase.initializeApp();
 
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  WidgetsFlutterBinding.ensureInitialized();
 
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    print('User granted permission');
-  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-    print('User granted provisional permission');
-  } else {
-    print('User declined or has not accepted permission');
-  }
+  await FCM.initialize();
+  await BackendApi.initialize();
 
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
-  // Método para verificar o status de login
-  Future<bool> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('authToken');
-    return token != null;
+  // Method to check login status and user type
+  Future<UserType?> _checkLoginStatus() async {
+    bool isLogged = await Auth.checkToken();
+    if (!isLogged) {
+      return null;
+    }
+    return Auth.getUserType();
   }
 
   @override
-  Widget build(BuildContext context) {  
+  Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'App de Cadastro',
+      title: 'ZAE Coffee',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
       ),
-      home: FutureBuilder<bool>(
+      home: FutureBuilder<UserType?>(
         future: _checkLoginStatus(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            // Enquanto verifica o status de login, exibe um indicador de progresso
+            // While checking login status, display a progress indicator
             return Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           } else {
-            if (snapshot.data == true) {
-              // Usuário está logado, vai para a UserPage
-              return UserPage();
+            if (snapshot.data == UserType.user) {
+              // User is logged in as a regular user, navigate to MainScreen
+              return MainScreen();
+            } else if (snapshot.data == UserType.support) {
+              // User is logged in as admin, navigate to AdminProfilePage
+              return AdminProfilePage();
             } else {
-              // Usuário não está logado, vai para a página inicial
-              return MyHomePage();
+              // User is not logged in, navigate to the HomePage
+              return HomePage();
             }
           }
         },
@@ -77,50 +77,13 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => LoginPage(),
         '/signup': (context) => SignupPage(),
-        '/user': (context) => UserPage(), // Adicionamos a rota para UserPage
+        '/user': (context) => UserPage(),
+        '/home_app': (context) => HomeAppPage(username: 'User'),
+        '/my_favorite': (context) => MyFavoritePage(),
+        '/adminProfile': (context) => AdminProfilePage(),
+        '/reports': (context) => ReportsPage(),
+        '/loading': (context) => LoadingPage(),
       },
-    );
-  }
-}
-
-// Página inicial com opções de login e cadastro
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Barra de título
-      appBar: AppBar(
-        title: Text('ZAE Café'),
-      ),
-      // Conteúdo da página
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              // Texto de boas-vindas
-              'Bem-vindo ao ZAE Café!',
-              style: TextStyle(fontSize: 24),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              // Botão para ir para a página de cadastro
-              onPressed: () {
-                Navigator.pushNamed(context, '/signup');
-              },
-              child: Text('Cadastrar'),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              // Botão para ir para a página de login
-              onPressed: () {
-                Navigator.pushNamed(context, '/login');
-              },
-              child: Text('Login'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

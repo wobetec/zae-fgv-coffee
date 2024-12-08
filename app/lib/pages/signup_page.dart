@@ -1,13 +1,12 @@
 // lib/pages/signup_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../config.dart'; // Arquivo de configuração com a baseUrl
-import 'package:shared_preferences/shared_preferences.dart';
-import 'user_page.dart'; // Importamos a UserPage para navegar após o cadastro
-import 'package:connectivity_plus/connectivity_plus.dart'; // Para verificar conectividade
-import 'dart:io'; // Necessário para SocketException
+import 'components/custom_input_field.dart';
+import 'components/custom_button.dart';
+import 'constants.dart';
+import 'main_screen.dart';
+
+import 'package:namer_app/api/auth.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -15,109 +14,51 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  // Controladores para os campos de entrada
+  // Controllers for input fields
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false; // Indicador de carregamento
+  bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Nenhuma ação necessária no initState para este caso
-  }
+  // For hover effect on "Sign In" text
+  bool _isHovering = false;
 
-  // Verifica a conectividade de rede
-  Future<void> _checkConnectivity() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      print('Sem conexão de rede.');
-      _showDialog('Erro de Rede', 'Sem conexão de rede disponível.');
-      return;
-    } else {
-      print('Conexão de rede disponível.');
-    }
-  }
-
-  // Método para registrar o usuário
-  Future<void> _register() async {
-    await _checkConnectivity(); // Verifica a conectividade antes do cadastro
-
+  Future<void> _signup() async {
     setState(() {
-      _isLoading = true; // Exibe o indicador de carregamento
+      _isLoading = true;
     });
 
     String username = _usernameController.text.trim();
     String email = _emailController.text.trim();
-    String password = _passwordController.text;
+    String password = _passwordController.text.trim();
 
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      _showDialog('Erro', 'Todos os campos são obrigatórios.');
+      _showDialog('Error', 'All fields are required.');
       setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
+        _isLoading = false;
       });
       return;
     }
 
-    Map<String, String> data = {
-      'username': username,
-      'email': email,
-      'password': password,
-    };
-
     try {
-      print('Enviando requisição de cadastro para o servidor...');
-      print('Dados enviados: ${json.encode(data)}');
-
-      final response = await http
-          .post(
-            Uri.parse('${Config.baseUrl}/auth/signup'),
-            headers: {'Content-Type': 'application/json'},
-            body: json.encode(data),
-          )
-          .timeout(Duration(seconds: 10), onTimeout: () {
-        throw Exception('Conexão expirou');
-      });
-
-      print('Status Code: ${response.statusCode}');
-      print('Resposta do servidor: ${response.body}');
-
-      if (response.statusCode == 201) {
-        var responseData = json.decode(response.body);
-        String token = responseData['token'];
-
-        // Armazenar o token no SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('authToken', token);
-
-        // Navegar para a UserPage
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => UserPage()),
-        );
-      } else {
-        var responseData = json.decode(response.body);
-        String errorMessage =
-            responseData['error'] ?? 'Erro ao cadastrar usuário.';
-        _showDialog('Erro', errorMessage);
-      }
+      print("$username, $email, $password");
+      await Auth.signup(username, email, password);
     } catch (e) {
-      print('Erro durante o cadastro: $e');
-      if (e is SocketException) {
-        print('SocketException: ${e.message}');
-        _showDialog('Erro',
-            'Não foi possível conectar ao servidor. Verifique sua conexão.');
-      } else {
-        _showDialog('Erro', 'Ocorreu um erro. Detalhes: $e');
-      }
-    } finally {
-      setState(() {
-        _isLoading = false; // Oculta o indicador de carregamento
-      });
+      _showDialog('Error', 'Failed to sign up. Please try again.');
     }
+
+    // Navigate to MainScreen
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen()),
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
-  // Método para exibir diálogos de erro ou sucesso
+  // Method to show dialogs
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
     showDialog(
       context: context,
@@ -141,7 +82,7 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   void dispose() {
-    // Limpa os controladores ao descartar o widget
+    // Dispose the controllers when the widget is removed
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -150,35 +91,118 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Define maximum widths for input fields and buttons
+    double maxInputFieldWidth = 800.0; // Input fields max width
+    double maxButtonWidth = 500.0; // Buttons max width
+
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Página de Cadastro'),
+        title: Text(
+          'Sign Up',
+          style: TextStyle(
+            color: textColor,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Nome de Usuário'),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Senha'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            _isLoading
-                ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _register,
-                    child: Text('Cadastrar'),
+      body: Center(
+        child: SingleChildScrollView(
+          // Handles overflow on smaller screens
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Username Field
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _usernameController,
+                  label: 'Username',
+                ),
+              ),
+              SizedBox(height: 20),
+              // Email Field
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _emailController,
+                  label: 'Email',
+                ),
+              ),
+              SizedBox(height: 20),
+              // Password Field
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  obscureText: true,
+                ),
+              ),
+              SizedBox(height: 30),
+              // Sign Up Button
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxButtonWidth),
+                      child: CustomButton(
+                        text: 'Sign Up',
+                        onPressed: _signup,
+                        backgroundColor: primaryColor,
+                        textColor: Colors.white,
+                        width: double.infinity, // Button fills available width
+                      ),
+                    ),
+              SizedBox(height: 20),
+              // Sign In Option
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    text: "Already have an account? ",
+                    style: TextStyle(
+                      color: textColor,
+                    ),
+                    children: [
+                      WidgetSpan(
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          onEnter: (_) {
+                            setState(() {
+                              _isHovering = true;
+                            });
+                          },
+                          onExit: (_) {
+                            setState(() {
+                              _isHovering = false;
+                            });
+                          },
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(context, '/login');
+                            },
+                            child: Text(
+                              'Sign In.',
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.bold,
+                                decoration: _isHovering
+                                    ? TextDecoration.underline
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-          ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
