@@ -9,6 +9,7 @@ from datetime import datetime
 from app.models import VendingMachine, Order, Sell
 from app.permissions import IsSupportUser
 
+from app.views.report_builder import *
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
@@ -44,60 +45,15 @@ def daily_report(request):
     sells = Sell.objects.filter(order__order_date__date=report_date)
     total_items_sold = sells.aggregate(Sum("sell_quantity"))["sell_quantity__sum"] or 0
 
-    # Compile the report content
-    report_content = f"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Daily Report for {report_date}</title>
-            <style>
-                body {{
-                    font-family: Arial, sans-serif;
-                    line-height: 1.6;
-                    margin: 20px;
-                    padding: 20px;
-                    background-color: #f9f9f9;
-                    color: #333;
-                }}
-                h1 {{
-                    color: #2c3e50;
-                }}
-                .report {{
-                    border: 1px solid #ddd;
-                    padding: 15px;
-                    background: #fff;
-                    border-radius: 5px;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                }}
-                .report h2 {{
-                    margin-top: 0;
-                }}
-                .highlight {{
-                    color: #e74c3c;
-                    font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-            <div class="report">
-                <h1>Daily Report for {report_date}</h1>
-                <hr>
-                <h2>Summary:</h2>
-                <p><strong>Number of vending machines:</strong> <span class="highlight">{vending_machine_count}</span></p>
-                <p><strong>Total orders placed:</strong> <span class="highlight">{total_orders}</span></p>
-                <p><strong>Total sales amount:</strong> <span class="highlight">${total_sales:.2f}</span></p>
-                <p><strong>Total items sold:</strong> <span class="highlight">{total_items_sold}</span></p>
-            </div>
-        </body>
-        </html>
-    """
+    builder = DetailedReportBuilder()
+
+    director = ReportDirector(builder)
+    report = director.construct_report(report_date, vending_machines, total_orders, total_sales, total_items_sold)
 
     response = Response(
         {
             "date": report_date_str,
-            "content": report_content,
+            "content": report.as_html(),
         },
         status=status.HTTP_200_OK,
     )
