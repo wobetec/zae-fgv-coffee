@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório A2 - Refatoração</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" 
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="../index.html">
+            <h1><small>ZAE FGV Coffee - Relatório A2</small></h1>
+        </a>
+    </nav>
+    <div class="container mb-4">
+        <div class="col">
+            <h1 class="text-center">Relatório A2 - Refatoração</h1>
+
+            <h2>Introdução</h2>
+            <p>
+                O presente relatório aborda a refatoração do aplicativo de rede social desenvolvido nas sprints que se decorreram na A1, com foco na melhoria da arquitetura e na aplicação de design patterns. A refatoração visa garantir a qualidade e a manutenibilidade do código, permitindo a correção de problemas de design e aprimoramento da estrutura do software. Durante a refatoração, foram aplicados 5 design patterns para melhorar a organização e a flexibilidade do código.
+            </p>
+
+
+            <h2>Design Patterns Utilizados</h2>
+            <p>
+                Implementamos três padrões de projetos criacionais, um estrutural e um comportamental. Comentaremos sobre cada um deles seguindo a seguinte estrutura:
+                <ul>
+                    <li>Justificativas</li>
+                    <li>Como foi aplicado</li>
+                    <li>Impacto no projeto</li>
+                </ul>
+            </p>
+
+
+
+
+            
+            <h3>1 - Singleton</h3>
+            <p>
+                Implementamos o <strong>Singleton</strong> no módulo do frontend que se comunica com o backend.
+            </p>
+            
+            <h4>Justificativa</h4>
+            <p>
+                O módulo em questão é responsável por gerenciar os estados de autenticação do aplicativo, isto é, gerenciar o token de acesso. Essa variável é importante em todo o módulo pois é necessária para realização das requisições na API. A utilização do singleton garantirá o controle dessa variável, bem como permitirá o acesso global a ela sem a necessidade de recriação em cada componente que a utilize.
+            </p>
+            
+            <h4>Como foi aplicado</h4>
+            <p>
+                Nosso módulo que encapsula a comunicação entre o backend e o frontend é composto por diversas classes, cada uma representando um tipo de acesso ao backend. Por exemplo, a classe <code>Auth</code> foi convertida em um singleton, garantindo que apenas uma única instância seja criada e reutilizada em todo o código.
+            </p>
+            <p>
+                Devido às particularidades da linguagem Dart e para permitir o uso de testes que simulam a conexão com o backend, cada uma dessas classes precisa implementar um método de inicialização que define os atributos necessários para o singleton funcionar corretamente.
+            </p>
+            <p>
+                Além disso, transformamos todas as classes que se conectam a APIs em singletons. Embora apenas as classes <code>FCM</code> (responsável pelo Cloud Messaging) e <code>Auth</code> possuam atualmente variáveis de estado que precisam ser protegidas, decidimos unificar o padrão de implementação para todas as classes. Essa abordagem facilita a manutenção do código e garante que o arcabouço esteja preparado para futuras atualizações, caso variáveis de estado sejam adicionadas em outras classes.
+            </p>
+            
+            <h4>Impacto no Projeto</h4>
+            <p>
+                A versão do projeto antes da refatoração já utilizava algo similar a um singleton. Utilizamos atributos e métodos estáticos que se comportavam como um singleton. Contudo, a utilização do desing pattern nos garante maior manutenibilidade do software, mas sobretudo garante controle estrito dos estados que a classe guarda. Essa refatoração nos garante que futuramente não teremos problemas com o gerenciamento dos tokens, dando maior segurança em incrementos futuros.
+            </p>
+
+
+
+
+
+
+
+
+            <h3>2 - Factory Method</h3>
+            <p>
+                O padrão de projeto <strong>Factory Method</strong> foi utilizado para melhorar o módulo de seleção de datas no frontend. 
+                Abaixo detalhamos sua aplicação:
+            </p>
+            
+            <h4>Justificativa</h4>
+            <p>
+                O módulo de seleção de datas é utilizado em diferentes plataformas, incluindo mobile e web, cada uma com requisitos distintos para a entrada de data. No mobile, o uso do calendário nativo oferece uma experiência mais intuitiva, enquanto na web, a entrada manual no formato YYYY-MM-DD é mais prática. A utilização do padrão Factory permite encapsular a lógica de escolha do método apropriado de seleção de data com base na plataforma, garantindo um design flexível e extensível.
+            </p>
+            
+            <h4>Como foi aplicado</h4>
+            <p>
+                Criamos uma interface <code>DateSelector</code> que define o comportamento esperado para a seleção de datas. Duas implementações concretas foram feitas: <code>MobileDateSelector</code>, que utiliza o calendário nativo, e <code>WebDateSelector</code>, que oferece uma entrada manual. A fábrica <code>DateSelectorFactory</code> identifica a plataforma em tempo de execução e retorna a implementação apropriada. A classe <code>ReportsPage</code> utiliza essa fábrica para obter o seletor correto sem precisar se preocupar com os detalhes de implementação.
+            </p>
+            
+            <h4>Impacto no Projeto</h4>
+            <p>
+                Antes da aplicação do padrão Factory, o código continha verificações de plataforma dispersas, aumentando a complexidade e dificultando a manutenção. Com a refatoração, encapsulamos essa lógica, reduzindo a duplicação de código e aumentando a clareza. O padrão Factory também facilita futuras extensões, como adicionar suporte a novas plataformas. Isso garante maior manutenibilidade e flexibilidade para o software, além de melhorar a experiência do usuário final ao oferecer uma interface de seleção de datas adequada para cada dispositivo.
+            </p>
+            <p>
+                Com essa refatoração, o sistema tornou-se mais modular e preparado para futuras evoluções, oferecendo uma solução robusta e escalável para o módulo de seleção de datas.
+            </p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <h3>3 - Builder</h3>
+            <p>
+                O padrão de projeto <strong>Builder</strong> foi utilizado para melhorar o processo de geração de relatórios no sistema. 
+                Abaixo detalhamos sua implementação:
+            </p>
+
+            <h4>Justificativa</h4>
+            <p>
+                O padrão de projeto <strong>Builder</strong> foi escolhido para resolver o problema de geração de relatórios flexíveis e reutilizáveis no sistema. A aplicação exige que relatórios sejam gerados com diferentes níveis de detalhamento e organização. Além disso, a possibilidade de representar os relatórios em diferentes formatos, como texto e HTML, requer uma separação clara entre a lógica de construção do relatório e o seu formato final. O <strong>Builder</strong> oferece uma solução para estruturar essa construção de forma modular e extensível, permitindo que relatórios sejam facilmente configurados sem alterar a lógica principal do sistema, que funciona com endpoints retornando o que foi solicitado. 
+
+            </p>
+
+            <h4>Como foi aplicado</h4>
+            <p>
+                A implementação do Builder foi realizada utilizando as seguintes classes:
+            </p>
+            <ul>
+                <li>
+                    <strong>Classe Report</strong>: A classe <code>Report</code> representa o produto que está sendo construído. Ela encapsula os dados do relatório, como a data e as seções, e fornece os métodos para configurar e formatar o relatório final. Essa classe é essencialmente o objeto que o builder constrói passo a passo.
+                </li>
+                <li>
+                    <strong>Classe Abstrata ReportBuilder</strong>: Essa classe define a interface para a construção do relatório. Ela fornece métodos genéricos como <code>set_date()</code> e o método abstrato <code>build_basic_report()</code>, que é implementado nas subclasses para construir partes específicas do relatório. Para os relatórios mais completos, colocaríamos os métodos que definem e retornam as componentes com as novas seções.
+                </li>
+                <li>
+                    <strong>Classe Concreta SimpleReportBuilder</strong>: Essa classe herda de <code>ReportBuilder</code> e implementa o método <code>build_basic_report()</code>, que adiciona ao relatório as informações principais, como número de máquinas de venda, total de pedidos, vendas e itens vendidos. A formatação específica para HTML foi incluída diretamente no conteúdo construído, utilizando tags HTML para melhorar a apresentação visual. O interessante aqui é poder criar relatórios diferentes apenas modificando a implementação da classe concreta, casso necessário.
+
+                </li>
+                <li>
+                    <strong>Classe ReportDirector</strong>: Por fim, a classe <code>ReportDirector</code> é responsável por orquestrar o processo de construção, garantindo que os passos necessários para gerar um relatório sejam seguidos na ordem correta. Ela recebe o builder como dependência, aumentando a flexibilidade.
+
+                </li>
+            </ul>
+
+            <h4>Impacto no Projeto</h4>
+            <p> 
+                Antes da implementação, qualquer modifiação que fosse ser realizad, precisaria ou criar um endpoint novo, ou adicionar uma imensidão de código em um endpoint existente, o que dificultaria a manutenção com o decorrer do tempo. Com o <strong>Builder</strong>, foi possível gerar diferentes tipos de relatórios (ex.: básicos, detalhados) sem modificar a lógica principal do sistema. A separação entre dados e formatação facilitou futuras alterações no design do relatório, como adicionar novos formatos (PDF, JSON) ou níveis de detalhamento, criando novas seções. Além disso, a modularidade das classes envolvidas no padrão reduziu a duplicação de código, permitindo que novos relatórios compartilhem boa parte da lógica já estruturada, sendo necessário ou criar novos Builders ou os métodos das seções. Com o <code>SimpleReportBuilder</code>, os relatórios puderam ser facilmente renderizados para HTML, ganhando um design profissional. A separação do processo de construção e formatação do HTML garantiu que alterações visuais não afetassem o núcleo do sistema, que é a principal vantagem desse método criacional.
+            </p>
+
+
+
+
+
+
+
+
+            <h3>4 - Facade</h3>
+            <p>
+                Implementamos o <strong>facade</strong> como simplificador para o acesso a múltiplas APIs dentro do frontend.
+            </p>
+            
+            <h4>Justificativa</h4>
+            <p>
+                Dentro do frontend criamos diversas classes simples, uma para acesso a cada um dos grupos de endpoints do nosso backend. Além disso, há uma classe que se comunica com o Firebase Cloud Messaging para utilização do Push Notification. Algumas rotinas como login, logout e signup misturam algumas dessas classes. Por isso, escolhemos utilizar o <strong>facade</strong> para simplificar no nosso código, bem como garantir melhor escalabilidade para endpoints futuros que venham a precisar de operações complexas.
+            </p>
+            
+            <h4>Como foi aplicado</h4>
+            <p>
+                Para evitar que as classes de API conheçam diretamente a classe <code>FCM</code>, adotamos o padrão <strong>facade</strong> como orquestrador das interações entre elas. Antes, possuíamos uma classe separada exclusivamente para inicializar todas as classes do backend. Essa funcionalidade foi removida e transferida para o nosso <strong>facade</strong>, denominado <code>APIs</code>, que centraliza a comunicação com as duas APIs utilizadas no projeto.
+
+                Além disso, o <strong>facade</strong> APIs também serve como uma interface para acessar as classes de API. Isso é útil para funcionalidades simples que, no momento, não justificam encapsulamento adicional, mantendo o design enxuto.
+            </p>
+            <p>
+                A classe <code>APIs</code> agora é responsável por:
+
+                <ul>
+                    <li>
+                        Inicializar todas as classes de API, configurando seus respectivos endpoints (uma abstração essencial para permitir a realização de testes).
+                    </li>
+                    <li>
+                        Implementar métodos que exigem a interação de múltiplas classes, como login, logout e signup.
+                    </li>
+                    <li>
+                        Métodos que não demandam a comunicação entre várias classes continuam acessíveis diretamente por meio das instâncias das classes de API, que são armazenadas como atributos dentro de APIs. Essa estrutura centralizada simplifica o gerenciamento de dependências, enquanto mantém o código flexível e organizado para futuras alterações.
+                    </li    >
+                </ul>
+            </p>
+            
+            <h4>Impacto no Projeto</h4>
+            <p>
+                O principal impacto para o projeto foi permitir a escalabilidade posterior. Uma vez que possuímos uma interface simplificada para controlar a comunicação necessária entre as APIs podemos de forma simples acrescentar mais comportamentos complexos entre as classes sem demandar mudanças em diversos pontos do código.
+            </p>
+
+
+
+
+
+
+
+
+
+            <h3>5 - Observer</h3>
+            <p>
+                Implementamos o <strong>observer</strong> para a realização de notificações de produtos esgotados.
+            </p>
+            
+            <h4>Justificativa</h4>
+            <p>
+                ------------
+            </p>
+            
+            <h4>Como foi aplicado</h4>
+            <p>
+                ------------
+            </p>
+            
+            <h4>Impacto no Projeto</h4>
+            <p>
+                ------------
+            </p>
+        </div>
+    </div>
+</body>
+</html>
