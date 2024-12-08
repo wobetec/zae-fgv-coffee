@@ -45,7 +45,8 @@ class _ReportsPageState extends State<ReportsPage> {
     final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
     try {
-      final reportData = await SimpleReport.getSimpleReport(dateStr);
+      SimpleReport simpleReport = SimpleReport();
+      final reportData = await simpleReport.getSimpleReport(dateStr);
       final content = reportData["content"] ?? "<p>No content</p>";
 
       setState(() {

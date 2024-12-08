@@ -1,11 +1,11 @@
 // lib/pages/home_app_page.dart
 
 import 'package:flutter/material.dart';
+
 import 'components/product_card.dart';
 import 'vending_machine_page.dart';
-import 'constants.dart';
 import 'package:namer_app/api/product.dart';
-import 'package:namer_app/api/vending_machine.dart';
+
 
 class HomeAppPage extends StatefulWidget {
   final String username;
@@ -15,6 +15,7 @@ class HomeAppPage extends StatefulWidget {
   @override
   _HomeAppPageState createState() => _HomeAppPageState();
 }
+
 
 class _HomeAppPageState extends State<HomeAppPage> {
   List<dynamic> _products = [];
@@ -26,7 +27,8 @@ class _HomeAppPageState extends State<HomeAppPage> {
   }
 
   Future<void> _loadProducts() async {
-    List<dynamic> products = await Product.getProducts();
+    Product product = Product();
+    List<dynamic> products = await product.getProducts();
     setState(() {
       _products = products;
     });

@@ -3,14 +3,23 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'device_id.dart';
 import '../config.dart';
 import 'package:namer_app/firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class FCM {
-  static String? _deviceId;
-  static String? _registrationId;
-  static String? _deviceType;
+  String? _deviceId;
+  String? _registrationId;
+  String? _deviceType;
 
-  static Future<void> initialize() async {
+  FCM._privateConstructor();
+
+  static final FCM _instance = FCM._privateConstructor();
+
+  factory FCM() {
+    return _instance;
+  }
+
+  Future<void> initialize() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -32,14 +41,19 @@ class FCM {
     }
 
     // Set device ID
-    _deviceId = await DeviceId.getId();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('deviceId') == null) {
+      _deviceId = await DeviceId.getId();
+    } else {
+      _deviceId = prefs.getString('deviceId');
+    }
     _deviceType = DeviceId.getDeviceType();
 
     // Set FCM token
     _registrationId = await FirebaseMessaging.instance.getToken(vapidKey: Config.vapidKey);
   }
 
-  static String? get deviceId => _deviceId;
-  static String? get registrationId => _registrationId;
-  static String? get deviceType => _deviceType;
+  String? get deviceId => _deviceId;
+  String? get registrationId => _registrationId;
+  String? get deviceType => _deviceType;
 }

@@ -22,7 +22,8 @@ class _MyFavoritePageState extends State<MyFavoritePage> {
 
   Future<void> _loadFavoriteProducts() async {
     try {
-      final favorites = await Product.getFavoriteProducts();
+      Product product = Product();
+      final favorites = await product.getFavoriteProducts();
       setState(() {
         favoriteProducts = favorites;
         isLoading = false;

@@ -53,7 +53,8 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<void> _loadFavoriteProducts() async {
-    dynamic favorites = await Product.getFavoriteProducts();
+    Product product = Product();
+    dynamic favorites = await product.getFavoriteProducts();
 
     setState(() {
       _isFavorited = checkFavorite(favorites);
@@ -62,6 +63,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<void> _toggleFavorite() async {
+    Product product = Product();
     final productData = widget.productData;
     final machineData = widget.stockData;
     final productId = productData['prod_id'];
@@ -69,12 +71,12 @@ class _ProductPageState extends State<ProductPage> {
 
     try {
       if (_isFavorited) {
-        await Product.removeFavoriteProduct(productId, vmId);
+        await product.removeFavoriteProduct(productId, vmId);
         setState(() {
           _isFavorited = false;
         });
       } else {
-        await Product.addFavoriteProduct(productId, vmId);
+        await product.addFavoriteProduct(productId, vmId);
         setState(() {
           _isFavorited = true;
         });
@@ -90,8 +92,10 @@ class _ProductPageState extends State<ProductPage> {
     final productId = product['prod_id'];
     final vmId = stock["vending_machine"]['vm_id'];
 
+    Purchase purchase = Purchase();
+
     try {
-      final result = await Purchase.purchase(vmId, [
+      await purchase.purchase(vmId, [
         {'prod_id': productId, 'quantity': 1}
       ]);
 

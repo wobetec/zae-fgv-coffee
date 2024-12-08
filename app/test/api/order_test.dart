@@ -13,26 +13,29 @@ import 'order_test.mocks.dart';
 
 @GenerateMocks([EndPointOrder])
 void main(){
+  Auth auth = Auth();
+  Order order = Order();
+
   group("Test getOrders", (){
     test("Get orders with correct token", () async {
       EndPointOrder endPointOrder = MockEndPointOrder();
       when(endPointOrder.getOrders("123")).thenAnswer((_) async => Response('[]', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Order.initialize(endPointOrder, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      order.initialize(endPointOrder, force: true);
 
-      dynamic order = await Order.getOrders();
+      dynamic orderResult = await order.getOrders();
 
-      expect(order, []);
+      expect(orderResult, []);
     });
 
     test("Get orders with no token", () async {
       EndPointOrder endPointOrder = MockEndPointOrder();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Order.initialize(endPointOrder, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      order.initialize(endPointOrder, force: true);
 
-      expect(() async => await Order.getOrders(), throwsException);
+      expect(() async => await order.getOrders(), throwsException);
     });
   });
 
@@ -40,22 +43,22 @@ void main(){
     test("Get order with correct token and orderId", () async {
       EndPointOrder endPointOrder = MockEndPointOrder();
       when(endPointOrder.getOrder("123", "123")).thenAnswer((_) async => Response('{"order_id": "123"}', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Order.initialize(endPointOrder, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      order.initialize(endPointOrder, force: true);
 
-      dynamic order = await Order.getOrder("123");
+      dynamic orderResult = await order.getOrder("123");
 
-      expect(order, {"order_id": "123"});
+      expect(orderResult, {"order_id": "123"});
     });
 
     test("Get order with no token", () async {
       EndPointOrder endPointOrder = MockEndPointOrder();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Order.initialize(endPointOrder, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      order.initialize(endPointOrder, force: true);
 
-      expect(() async => await Order.getOrder("123"), throwsException);
+      expect(() async => await order.getOrder("123"), throwsException);
     });
   });
 }

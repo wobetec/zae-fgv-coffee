@@ -26,8 +26,11 @@ Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  await FCM.initialize();
-  await BackendApi.initialize();
+  FCM fcm = FCM();
+  fcm.initialize();
+
+  BackendApi backendApi = BackendApi();
+  backendApi.initialize();
 
   runApp(MyApp());
 }
@@ -37,11 +40,12 @@ class MyApp extends StatelessWidget {
 
   // Method to check login status and user type
   Future<UserType?> _checkLoginStatus() async {
-    bool isLogged = await Auth.checkToken();
+    Auth auth = Auth();
+    bool isLogged = await auth.checkToken();
     if (!isLogged) {
       return null;
     }
-    return Auth.getUserType();
+    return auth.getUserType();
   }
 
   @override
