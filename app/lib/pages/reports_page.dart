@@ -1,7 +1,10 @@
 // lib/pages/reports_page.dart
 
 import 'package:flutter/material.dart';
-import 'constants.dart'; // Importar o arquivo de constantes
+import 'package:intl/intl.dart';
+import 'package:namer_app/api/simple_report.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'constants.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -11,8 +14,131 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
+  DateTime? _selectedDate;
+  bool _isLoading = false;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final now = DateTime.now();
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: now,
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _generateReport() async {
+    if (_selectedDate == null) {
+      _showErrorDialog('No Date Selected', 'Please select a day to generate a report.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+
+    try {
+      final reportData = await SimpleReport.getSimpleReport(dateStr);
+      final content = reportData["content"] ?? "<p>No content</p>";
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showLargeDialog(content, dateStr);
+
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showErrorDialog('Error', 'Failed to generate the report. Please try again.');
+    }
+  }
+
+  void _showLargeDialog(String content, String dateStr) {
+    final screenSize = MediaQuery.of(context).size;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Container(
+          // Ajuste o tamanho conforme necessário. Aqui usamos 80% da largura e altura da tela.
+          width: screenSize.width * 0.8,
+          height: screenSize.height * 0.8,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Generated',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text('Report generated for: $dateStr'),
+              SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Html(
+                    data: content,
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedDate = null;
+                    });
+                  },
+                  child: Text('OK'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    String selectedDateText = 'No date selected';
+    if (_selectedDate != null) {
+      selectedDateText = 'Selected date: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -28,126 +154,70 @@ class _ReportsPageState extends State<ReportsPage> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          // Texto instrutivo abaixo do AppBar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Select a day to generate the report.',
+      body: Center( 
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Select a day to generate a report.',
               style: TextStyle(
                 fontSize: 20,
                 color: textColor,
                 fontFamily: 'Roboto-SemiBold',
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          // Lista de relatórios
-          Expanded(
-            child: ListView.builder(
-              itemCount: 7, // Exemplo para os últimos 7 dias
-              itemBuilder: (context, index) {
-                final day = DateTime.now().subtract(Duration(days: index));
-                return ReportListItem(
-                  date: day,
-                  onTap: () {
-                    // Lógica ao selecionar um relatório
-                    // Exemplo: navegar para uma página de detalhes do relatório
-                  },
-                );
-              },
+            SizedBox(height: 16),
+            Text(
+              selectedDateText,
+              style: TextStyle(
+                fontSize: 16,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          // Botão "Generate Report"
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GenerateReportButton(
-              onPressed: () {
-                // Simula a geração do relatório e imprime a mensagem no terminal
-                print('O relatório foi gerado');
-
-                // Exibe uma mensagem de confirmação ao usuário
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Relatório Gerado'),
-                    content: Text('O relatório foi gerado com sucesso.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('OK'),
+            SizedBox(height: 16),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
+              ),
+              onPressed: () => _selectDate(context),
+              icon: Icon(Icons.calendar_today, color: Colors.white),
+              label: Text(
+                'Select Date',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontFamily: 'Roboto-Medium',
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            _isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
                       ),
-                    ],
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
+                    ),
+                    onPressed: _generateReport,
+                    child: Text(
+                      'Generate Report',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontFamily: 'Roboto-Medium',
+                      ),
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Componente para cada item da lista de relatórios
-class ReportListItem extends StatelessWidget {
-  final DateTime date;
-  final VoidCallback onTap;
-
-  const ReportListItem({Key? key, required this.date, required this.onTap})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final formattedDate = '${date.day}/${date.month}/${date.year}';
-    return ListTile(
-      leading: Icon(Icons.insert_drive_file, color: primaryColor),
-      title: Text(
-        'Report for $formattedDate',
-        style: TextStyle(
-          fontSize: 16,
-          color: textColor,
-          fontFamily: 'Roboto-SemiBold',
-        ),
-      ),
-      subtitle: Text(
-        'Generated report',
-        style: TextStyle(
-          fontSize: 14,
-          color: Color(0xFF80869A),
-          fontFamily: 'Roboto-Regular',
-        ),
-      ),
-      trailing: Icon(Icons.arrow_forward_ios, color: Colors.black54, size: 16),
-      onTap: onTap,
-    );
-  }
-}
-
-// Componente para o botão "Generate Report"
-class GenerateReportButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const GenerateReportButton({Key? key, required this.onPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100),
-        ),
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
-      ),
-      onPressed: onPressed,
-      child: Text(
-        'Generate Report',
-        style: TextStyle(
-          fontSize: 14,
-          color: textColor,
-          fontFamily: 'Roboto-Medium',
+          ],
         ),
       ),
     );

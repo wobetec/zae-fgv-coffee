@@ -1,13 +1,16 @@
 // lib/pages/login_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
-import 'home_app_page.dart';
-import 'signin_adm_page.dart';
+import 'main_screen.dart';
+import 'admin_profile_page.dart'; // Importamos a página de perfil do admin
+
+import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/api/notification.dart' as my_notification;
+import 'package:namer_app/fcm/fcm.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -15,22 +18,22 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  bool isAdmin = false; // Switch state
+  bool isAdmin = false;
+  bool _isHovering = false;
 
-  // Function to login as a regular user
-  Future<void> _loginAsUser() async {
+  Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
 
-    String email = _emailController.text.trim();
+    String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (username.isEmpty || password.isEmpty) {
       _showDialog('Error', 'Please fill in all fields.');
       setState(() {
         _isLoading = false;
@@ -38,18 +41,37 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Simulate successful login
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('authToken', 'dummy_token');
-    await prefs.setString('username', 'User');
-    await prefs.setString('email', email);
-    await prefs.setString('userType', 'user');
+    try {
+      await Auth.login(
+        username, 
+        password, 
+        isAdmin ? UserType.support : UserType.user
+      );
+      await my_notification.Notification.registerDevice(
+        FCM.registrationId!,
+        FCM.deviceType!,
+        FCM.deviceId!,
+      );
+    } catch (e) {
+      _showDialog('Error', 'Failed to sign in. Please try again.');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
 
-    // Navigate to HomeAppPage
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomeAppPage()),
-    );
+    // Se isAdmin == true, vai para AdminProfilePage. Caso contrário, vai para MainScreen.
+    if (isAdmin) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AdminProfilePage()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    }
 
     setState(() {
       _isLoading = false;
@@ -78,30 +100,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    isAdmin = false; // Ensure the switch starts on 'User'
-  }
-
-  @override
   void dispose() {
-    _emailController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // Updated build method
   @override
   Widget build(BuildContext context) {
+    double maxInputFieldWidth = 800.0; 
+    double maxButtonWidth = 500.0;
+
+    final appBarTitle = isAdmin ? 'Sign In as Admin' : 'Sign In';
+    final buttonText = isAdmin ? 'Sign In as Admin' : 'Sign In';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Sign In', style: TextStyle(color: textColor)),
+        title: Text(
+          appBarTitle,
+          style: TextStyle(color: textColor),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
         actions: [
-          // Switch in the AppBar
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: UserAdminSwitch(
@@ -110,69 +133,95 @@ class _LoginPageState extends State<LoginPage> {
                 setState(() {
                   isAdmin = val;
                 });
-                if (val) {
-                  // Navigate to SignInAdminPage when switched to Admin
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignInAdminPage()),
-                  );
-                }
               },
             ),
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SizedBox(height: 30),
-            // Email and Password fields
-            CustomInputField(
-              controller: _emailController,
-              label: 'Email',
-            ),
-            SizedBox(height: 20),
-            CustomInputField(
-              controller: _passwordController,
-              label: 'Password',
-              obscureText: true,
-            ),
-            SizedBox(height: 30),
-            // Sign In button
-            _isLoading
-                ? CircularProgressIndicator()
-                : CustomButton(
-                    text: 'Sign In',
-                    onPressed: _loginAsUser,
-                    backgroundColor: primaryColor,
-                    textColor: Colors.white,
-                  ),
-            SizedBox(height: 20),
-            // Sign Up option
-            GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/signup');
-              },
-              child: RichText(
-                text: TextSpan(
-                  text: "Don't have an account? ",
-                  style: TextStyle(
-                    color: textColor,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: 'Sign Up.',
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 30),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _usernameController,
+                  label: 'Username',
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  obscureText: true,
+                ),
+              ),
+              SizedBox(height: 30),
+              _isLoading
+                  ? CircularProgressIndicator()
+                  : ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxButtonWidth),
+                      child: CustomButton(
+                        text: buttonText,
+                        onPressed: _login,
+                        backgroundColor: primaryColor,
+                        textColor: Colors.white,
+                        width: double.infinity,
+                      ),
+                    ),
+              if (!isAdmin) ...[
+                SizedBox(height: 20),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      text: "Don't have an account? ",
+                      style: TextStyle(
+                        color: textColor,
+                      ),
+                      children: [
+                        WidgetSpan(
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            onEnter: (_) {
+                              setState(() {
+                                _isHovering = true;
+                              });
+                            },
+                            onExit: (_) {
+                              setState(() {
+                                _isHovering = false;
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, '/signup');
+                              },
+                              child: Text(
+                                'Sign Up.',
+                                style: TextStyle(
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: _isHovering
+                                      ? TextDecoration.underline
+                                      : TextDecoration.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

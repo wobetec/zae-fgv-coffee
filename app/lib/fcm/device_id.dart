@@ -2,10 +2,14 @@ import 'dart:io';
 import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 class DeviceId {
   static Future<String?> getId() async {
-    if (Platform.isAndroid) {
+    if (kIsWeb) {
+      final newUuid = const Uuid().v4();
+      return newUuid;
+    } else if (Platform.isAndroid) {
       const androidIdPlugin = AndroidId();
       final String? androidId = await androidIdPlugin.getId();
       return androidId;
@@ -25,11 +29,25 @@ class DeviceId {
       final deviceInfo = DeviceInfoPlugin();
       final windowsInfo = await deviceInfo.windowsInfo;
       return windowsInfo.deviceId; // Unique ID on Windows
-    } else if (kIsWeb) {
-      // For web, we can use a combination of browser information or generate a UUID
-      final deviceInfo = DeviceInfoPlugin();
-      final webInfo = await deviceInfo.webBrowserInfo;
-      return "${webInfo.vendor}-${webInfo.userAgent}-${webInfo.hardwareConcurrency}";
+    } else {
+      throw Exception('Platform not implemented');
+    }
+
+  }
+
+  static String getDeviceType() {
+    if (kIsWeb) {
+      return 'web';
+    } else if (Platform.isAndroid) {
+      return 'android';
+    } else if (Platform.isIOS) {
+      return 'ios';
+    } else if (Platform.isLinux) {
+      return 'linux';
+    } else if (Platform.isMacOS) {
+      return 'macos';
+    } else if (Platform.isWindows) {
+      return 'windows';
     } else {
       throw Exception('Platform not implemented');
     }

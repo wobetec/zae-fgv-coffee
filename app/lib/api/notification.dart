@@ -18,7 +18,7 @@ class Notification {
     }
     await _endPointNotification!.registerDevice(Auth.getToken()!, registrationId, type, deviceId)
       .then((response) {
-        if (response.statusCode != 200) {
+        if (response.statusCode != 201) {
           throw Exception('Failed to register device');
         }
       })
@@ -26,5 +26,4 @@ class Notification {
         throw Exception('Failed to register device');
       });
   }
-
 }

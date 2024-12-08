@@ -16,7 +16,7 @@ void main(){
       when(endPointAuth.login("esdras", "esdras")).thenAnswer((_) async => Response('{"token": "123"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
-      await Auth.login("esdras", "esdras");
+      await Auth.login("esdras", "esdras", UserType.user);
       expect(Auth.hasToken(), true);
     });
 
@@ -25,35 +25,36 @@ void main(){
       when(endPointAuth.login("esdras", "esdras")).thenAnswer((_) async => Response('{"error": "Invalid username or password"}', 400));
       Auth.initialize(endPointAuth, force: true);
 
-      expect(() async => await Auth.login("esdras", "esdras"), throwsException);
+      expect(() async => await Auth.login("esdras", "esdras", UserType.user), throwsException);
     });
   });
 
   group("Test logout", (){
     test("with token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
-      when(endPointAuth.logout("123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
+      when(endPointAuth.logout("123", "123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
       // login
       Auth.setToken("123");
+      Auth.setUserType(UserType.user);
 
       //logout
-      await Auth.logout();
+      await Auth.logout("123");
       expect(Auth.hasToken(), false);
     });
 
     test("without token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
       Auth.initialize(endPointAuth, force: true);
-      expect(() async => await Auth.logout(), throwsException);
+      expect(() async => await Auth.logout("123"), throwsException);
     });
   });
 
   group("Test signup", (){
     test("with valid username, email and password", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
-      when(endPointAuth.signup("esdras", "esdras", "esdras")).thenAnswer((_) async => Response('{"token": "123"}', 200));
+      when(endPointAuth.signup("esdras", "esdras", "esdras")).thenAnswer((_) async => Response('{"token": "123"}', 201));
       Auth.initialize(endPointAuth, force: true);
 
       await Auth.signup("esdras", "esdras", "esdras");
@@ -84,7 +85,7 @@ void main(){
       when(endPointAuth.supportLogin("esdras", "esdras")).thenAnswer((_) async => Response('{"token": "123"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
-      await Auth.supportLogin("esdras", "esdras");
+      await Auth.login("esdras", "esdras", UserType.support);
       expect(Auth.hasToken(), true);
     });
 
@@ -93,28 +94,29 @@ void main(){
       when(endPointAuth.supportLogin("esdras", "esdras")).thenAnswer((_) async => Response('{"error": "Invalid username or password"}', 400));
       Auth.initialize(endPointAuth, force: true);
 
-      expect(() async => await Auth.supportLogin("esdras", "esdras"), throwsException);
+      expect(() async => await Auth.login("esdras", "esdras", UserType.support), throwsException);
     });
   });
 
   group("Test support logout", (){
     test("with token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
-      when(endPointAuth.supportLogout("123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
+      when(endPointAuth.supportLogout("123", "123")).thenAnswer((_) async => Response('{"message": "Logout successful"}', 200));
       Auth.initialize(endPointAuth, force: true);
 
       // login
       Auth.setToken("123");
+      Auth.setUserType(UserType.support);
 
       //logout
-      await Auth.supportLogout();
+      await Auth.logout("123");
       expect(Auth.hasToken(), false);
     });
 
     test("without token", () async {
       EndPointAuth endPointAuth = MockEndPointAuth();
       Auth.initialize(endPointAuth, force: true);
-      expect(() async => await Auth.supportLogout(), throwsException);
+      expect(() async => await Auth.logout("123"), throwsException);
     });
   });
 
@@ -126,6 +128,7 @@ void main(){
 
       // login
       Auth.setToken("123");
+      Auth.setUserType(UserType.user);
 
       expect(Auth.hasToken(), true);
       expect(await Auth.checkToken(), true);
@@ -140,10 +143,11 @@ void main(){
 
       // login
       Auth.setToken("123");
+      Auth.setUserType(UserType.support);
       expect(Auth.hasToken(), true);
 
       // check token
-      expect(await Auth.checkSupportToken(), true);
+      expect(await Auth.checkToken(), true);
     });
   });
 }

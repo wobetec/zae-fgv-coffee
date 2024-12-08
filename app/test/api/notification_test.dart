@@ -16,7 +16,7 @@ void main(){
   group("Test registerDevice", (){
     test("Register device with correct token, registrationId, type and deviceId", () async {
       EndPointNotification endPointNotification = MockEndPointNotification();
-      when(endPointNotification.registerDevice("123", "123", "android", "123")).thenAnswer((_) async => Response('{"message": "Device registered"}', 200));
+      when(endPointNotification.registerDevice("123", "123", "android", "123")).thenAnswer((_) async => Response('{"message": "Device registered"}', 201));
       Auth.initialize(EndPointAuth(), force: true);
       Auth.setToken("123");
       Notification.initialize(endPointNotification, force: true);

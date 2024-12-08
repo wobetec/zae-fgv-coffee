@@ -19,30 +19,32 @@ import 'package:namer_app/api/endpoints/endpoint_rating.dart';
 import 'package:namer_app/api/vending_machine.dart';
 import 'package:namer_app/api/endpoints/endpoint_vending_machine.dart';
 
-class BackendApi {
-    static var _initialized = false;
-    
-    static initialize(
-        {
-          EndPointAuth? endPointAuth,
-          EndPointNotification? endPointNotification,
-          EndPointOrder? endPointOrder,
-          EndPointProduct? endPointProduct,
-          EndPointPurchase? endPointPurchase,
-          EndPointRating? endPointRating,
-          EndPointVendingMachine? endPointVendingMachine
-        }
-    ) {
-        if (!_initialized) {
-            Auth.initialize(endPointAuth);
-            Notification.initialize(endPointNotification);
-            Order.initialize(endPointOrder);
-            Product.initialize(endPointProduct);
-            Purchase.initialize(endPointPurchase);
-            Rating.initialize(endPointRating);
-            VendingMachine.initialize(endPointVendingMachine);
+import 'package:namer_app/api/simple_report.dart';
+import 'package:namer_app/api/endpoints/endpoint_simple_report.dart';
 
-            _initialized = true;
-        }
+class BackendApi {
+  static var _initialized = false;
+
+  static initialize(
+      {EndPointAuth? endPointAuth,
+      EndPointNotification? endPointNotification,
+      EndPointOrder? endPointOrder,
+      EndPointProduct? endPointProduct,
+      EndPointPurchase? endPointPurchase,
+      EndPointRating? endPointRating,
+      EndPointVendingMachine? endPointVendingMachine,
+      EndPointSimpleReport? endPointSimpleReport}) {
+    if (!_initialized) {
+      Auth.initialize(endPointAuth ?? EndPointAuth());
+      Notification.initialize(endPointNotification ?? EndPointNotification());
+      Order.initialize(endPointOrder ?? EndPointOrder());
+      Product.initialize(endPointProduct ?? EndPointProduct());
+      Purchase.initialize(endPointPurchase ?? EndPointPurchase());
+      Rating.initialize(endPointRating ?? EndPointRating());
+      VendingMachine.initialize(endPointVendingMachine ?? EndPointVendingMachine());
+      SimpleReport.initialize(endPointSimpleReport ?? EndPointSimpleReport());
+
+      _initialized = true;
     }
+  }
 }

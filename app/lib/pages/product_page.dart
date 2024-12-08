@@ -9,15 +9,18 @@ import 'components/product_image.dart';
 import 'components/star_rating.dart';
 import 'components/favorite_button.dart';
 import 'components/section.dart';
+import 'constants.dart';
+import 'package:namer_app/api/product.dart';
+import 'package:namer_app/api/purchase.dart';
 
 class ProductPage extends StatefulWidget {
   final Map<String, dynamic> productData;
-  final Map<String, dynamic> vendingMachineData;
+  final Map<String, dynamic> stockData;
 
   const ProductPage({
     Key? key,
     required this.productData,
-    required this.vendingMachineData,
+    required this.stockData,
   }) : super(key: key);
 
   @override
@@ -27,11 +30,124 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   double _currentRating = 0.0;
   bool _isFavorited = false;
+  bool isLoading = true;
+  Map<String, dynamic>? productDetails;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteProducts();
+  }
+
+  bool checkFavorite(List<dynamic> favorites) {
+    final productData = widget.productData;
+
+    for (dynamic favorite in favorites) {
+      final String prodId = favorite["product"]["prod_id"];
+      final String vmId = favorite["vending_machine"]["vm_id"];
+      if (prodId == productData["prod_id"] && (vmId == productData["vm_id"])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<void> _loadFavoriteProducts() async {
+    dynamic favorites = await Product.getFavoriteProducts();
+
+    setState(() {
+      _isFavorited = checkFavorite(favorites);
+      isLoading = false;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    final productData = widget.productData;
+    final machineData = widget.stockData;
+    final productId = productData['prod_id'];
+    final vmId = machineData['vending_machine']['vm_id'];
+
+    try {
+      if (_isFavorited) {
+        await Product.removeFavoriteProduct(productId, vmId);
+        setState(() {
+          _isFavorited = false;
+        });
+      } else {
+        await Product.addFavoriteProduct(productId, vmId);
+        setState(() {
+          _isFavorited = true;
+        });
+      }
+    } catch (e) {
+      print('Erro ao atualizar favoritos: $e');
+    }
+  }
+
+  Future<void> _orderProduct() async {
+    final product = widget.productData;
+    final stock = widget.stockData;
+    final productId = product['prod_id'];
+    final vmId = stock["vending_machine"]['vm_id'];
+
+    try {
+      final result = await Purchase.purchase(vmId, [
+        {'prod_id': productId, 'quantity': 1}
+      ]);
+
+      print('Produto ${product['prod_name']} comprado com sucesso!');
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Compra realizada'),
+          content: Text('Você comprou o produto ${product['prod_name']}.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print('Erro ao comprar produto: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final product = widget.productData;
-    final vendingMachine = widget.vendingMachineData;
+    final stock = widget.stockData;
+
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFFF5722),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: const Color(0xFF232323)),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          title: Text(
+            'Carregando...',
+            style: TextStyle(
+              fontSize: 20,
+              color: const Color(0xFF232323),
+              fontFamily: 'Roboto-SemiBold',
+            ),
+          ),
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final prodName = product['prod_name'];
+    final prodDescription = product['prod_description'];
+    final prodPrice = product['prod_price'];
+    final stockQuant = stock["stock_quantity"];
 
     return Scaffold(
       appBar: AppBar(
@@ -44,7 +160,7 @@ class _ProductPageState extends State<ProductPage> {
           },
         ),
         title: Text(
-          product['title'] ?? 'Product',
+          prodName,
           style: TextStyle(
             fontSize: 20,
             color: const Color(0xFF232323),
@@ -55,116 +171,94 @@ class _ProductPageState extends State<ProductPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Imagem do Produto
             ProductImage(
               imageUrl: product['imageUrl'] ?? '',
             ),
-            // Detalhes do Produto
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Título do Produto
                   Text(
-                    product['title'] ?? 'Título do Produto',
+                    prodName,
                     style: TextStyle(
                       fontSize: 24,
                       fontFamily: 'Roboto-SemiBold',
                     ),
                   ),
                   SizedBox(height: 8),
-                  // Categoria ou Subtítulo
                   Text(
-                    product['subtitle'] ?? 'Categoria do Produto',
+                    'Price: \$${prodPrice.toString()}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'Roboto-Regular',
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'In stock: $stockQuant',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey,
+                      color: Colors.green,
                       fontFamily: 'Roboto-Regular',
                     ),
                   ),
                   SizedBox(height: 16),
-                  // Avaliação e Favorito
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Avaliação com Estrelas
                       StarRating(
                         rating: _currentRating,
                         onRatingChanged: (rating) {
                           setState(() {
                             _currentRating = rating;
                           });
-                          // Opcional: Enviar a avaliação para o backend
                         },
                       ),
-                      // Botão de Favorito
                       FavoriteButton(
                         isFavorited: _isFavorited,
-                        onPressed: () {
-                          setState(() {
-                            _isFavorited = !_isFavorited;
-                          });
-                          // Opcional: Atualizar favoritos no backend
-                        },
+                        onPressed: _toggleFavorite,
                       ),
                     ],
                   ),
                   SizedBox(height: 16),
-                  // Seção de Descrição
                   Section(
                     title: 'Description',
-                    content:
-                        product['description'] ?? 'Descrição do produto aqui.',
+                    content: prodDescription,
                   ),
                   SizedBox(height: 16),
-                  // Seção de Informações Nutricionais
                   Section(
                     title: 'Nutritional Information',
-                    content:
-                        product['nutrition'] ?? 'Informações nutricionais aqui.',
+                    content: product['nutrition'] ??
+                        'Informações nutricionais não disponíveis.',
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 80), // Espaço para o botão de pedido
+            SizedBox(height: 80),
           ],
         ),
       ),
-      // Botão de Pedido
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: CustomButton(
           text: 'Order',
-          onPressed: () {
-            // Simula a compra
-            print('Produto ${product['title']} foi comprado');
-            // Exibe uma mensagem de confirmação
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('Compra realizada'),
-                content: Text('Você comprou o produto ${product['title']}.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text('OK'),
-                  ),
-                ],
-              ),
-            );
-          },
+          onPressed: _orderProduct,
+          backgroundColor: primaryColor,
+          textColor: Colors.white,
         ),
       ),
-      // Rodapé
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: 0,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => HomeAppPage()),
+              MaterialPageRoute(
+                builder: (context) => HomeAppPage(username: 'User'),
+              ),
               (route) => false,
             );
           } else if (index == 1) {

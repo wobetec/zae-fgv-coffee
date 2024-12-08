@@ -20,32 +20,28 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: ListTile(
-          leading: imageUrl.isNotEmpty
-              ? Image.network(
-                  imageUrl,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                )
-              : Icon(Icons.image, size: 50),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.star, color: Colors.yellow, size: 20),
-              Text(
-                rating.toString(),
-                style: TextStyle(fontSize: 12),
-              ),
-            ],
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        leading: imageUrl.isNotEmpty
+            ? Image.network(imageUrl)
+            : Icon(Icons.image_not_supported),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontFamily: 'Roboto-SemiBold',
           ),
         ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap,
       ),
     );
   }

@@ -1,14 +1,15 @@
 // lib/pages/user_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/user_info_card.dart';
 import 'components/menu_option.dart';
-import 'components/custom_bottom_nav_bar.dart';
-import 'home_app_page.dart';
-import 'my_favorite_page.dart';
 import 'order_history_page.dart';
-import 'login_page.dart';
+import 'constants.dart';
+
+import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/fcm/fcm.dart';
+import 'home_page.dart';
+
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -19,9 +20,6 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   String username = '';
-  String email = '';
-
-  int _currentIndex = 1; // Highlight the 'Profile' tab
 
   @override
   void initState() {
@@ -29,115 +27,94 @@ class _UserPageState extends State<UserPage> {
     _loadUserData();
   }
 
+  
+  void _showDialog(String title, String message, {VoidCallback? onOk}) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (onOk != null) {
+                onOk();
+              }
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? 'User';
-      email = prefs.getString('email') ?? 'email@example.com';
+      username = Auth.getUsername() ?? 'User';
     });
   }
 
   // Function to handle sign out
   void _signOut() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    // Navigate to LoginPage
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => LoginPage()),
-      (route) => false,
-    );
-  }
+    try {
+      await Auth.logout(FCM.deviceId!);
+    } catch (e) {
+      _showDialog('Error', 'Failed to logout. Please try again.');
+      return;
+    } 
 
-  void _onNavBarTap(int index) {
-    if (index == 0) {
-      // Navigate to HomeAppPage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeAppPage()),
-      );
-    }
-    // If index is 1, we're already on the Profile page.
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     // Define colors
-    final primaryColor = Color(0xFFFF5722);
-    final textColor = Color(0xFF232323);
-    final backgroundColor = Color(0xFFFFFFFF);
     final cardColor = Color(0xFFE2E2E2);
 
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'My Profile',
-          style: TextStyle(
-            color: textColor,
+    return ListView(
+      key: PageStorageKey('UserPage'),
+      children: [
+        // User Info Card
+        UserInfoCard(
+          username: username,
+          textColor: textColor,
+          cardColor: cardColor,
+        ),
+        // Menu Options
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              Divider(color: cardColor),
+              MenuOption(
+                icon: Icons.history,
+                title: 'Order History',
+                onTap: () {
+                  // Navigate to OrderHistoryPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => OrderHistoryPage()),
+                  );
+                },
+              ),
+              Divider(color: cardColor),
+              // Removed 'My Favorites' MenuOption
+              MenuOption(
+                icon: Icons.logout,
+                title: 'Sign Out',
+                onTap: _signOut,
+              ),
+              Divider(color: cardColor),
+            ],
           ),
         ),
-        backgroundColor: primaryColor,
-        elevation: 0,
-        iconTheme: IconThemeData(color: textColor),
-      ),
-      body: ListView(
-        children: [
-          // User Info Card
-          UserInfoCard(
-            username: username,
-            email: email,
-            textColor: textColor,
-            cardColor: cardColor,
-          ),
-          // Menu Options
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                Divider(color: cardColor),
-                MenuOption(
-                  icon: Icons.history,
-                  title: 'Order History',
-                  onTap: () {
-                    // Navigate to OrderHistoryPage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => OrderHistoryPage()),
-                    );
-                  },
-                ),
-                Divider(color: cardColor),
-                MenuOption(
-                  icon: Icons.favorite,
-                  title: 'My Favorites',
-                  onTap: () {
-                    // Navigate to MyFavoritePage
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => MyFavoritePage()),
-                    );
-                  },
-                ),
-                Divider(color: cardColor),
-                MenuOption(
-                  icon: Icons.logout,
-                  title: 'Sign Out',
-                  onTap: _signOut,
-                ),
-                Divider(color: cardColor),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavBarTap,
-      ),
+      ],
     );
   }
 }

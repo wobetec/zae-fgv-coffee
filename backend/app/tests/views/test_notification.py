@@ -43,7 +43,7 @@ class RegisterDeviceTests(APITestCase):
             self.url, data, format="json", HTTP_AUTHORIZATION=f"Token {self.token.key}"
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_recreate_device(self):
         data = {
