@@ -1,9 +1,11 @@
-// lib/pages/admin_profile_page.dart
-
 import 'package:flutter/material.dart';
+
+import 'package:namer_app/api/auth.dart';
+import 'components/user_info_card.dart';
+import 'constants.dart';
 import 'reports_page.dart';
-import 'login_page.dart';
-import 'constants.dart'; // Importar o arquivo de constantes
+import 'package:namer_app/fcm/fcm.dart';
+import 'home_page.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
@@ -13,8 +15,20 @@ class AdminProfilePage extends StatefulWidget {
 }
 
 class _AdminProfilePageState extends State<AdminProfilePage> {
-  String adminName = 'Marcelo';
-  String adminEmail = 'marcelo@gmail.com';
+  String supportName = 'Support';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPageDetail();
+  }
+
+  Future<void> _loadPageDetail() async {
+    Auth auth = Auth();
+    setState(() {
+      supportName = auth.getUsername()!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +48,11 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           // Cabeçalho indicando o papel do usuário
           ProfileHeader(title: 'Admin'),
           // Cartão com informações do perfil
-          ProfileCard(name: adminName, email: adminEmail),
-          // Lista de opções
+          UserInfoCard(
+            username: supportName,
+            textColor: textColor,
+            cardColor: Color(0xFFE2E2E2),
+          ),
           Expanded(child: OptionList()),
         ],
       ),
@@ -117,6 +134,7 @@ class ProfileCard extends StatelessWidget {
 // Componente para a lista de opções
 class OptionList extends StatelessWidget {
   const OptionList({Key? key}) : super(key: key);
+  
 
   @override
   Widget build(BuildContext context) {
@@ -136,11 +154,20 @@ class OptionList extends StatelessWidget {
         OptionListTile(
           leading: Icon(Icons.logout, color: textColor),
           title: 'Sign Out',
-          onTap: () {
-            // Lógica para sair da conta e retornar à tela de login
+          onTap: () async {
+            try {
+              Auth auth = Auth();
+              FCM fcm = FCM();
+              await auth.logout(fcm.deviceId!);
+              auth.deleteState();
+            } catch (e) {
+              print('Failed to logout. Please try again.');
+              return;
+            }
+
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
+              MaterialPageRoute(builder: (context) => HomePage()),
               (route) => false,
             );
           },

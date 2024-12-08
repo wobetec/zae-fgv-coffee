@@ -32,7 +32,7 @@ class EndPointAuth extends EndPoint {
   }
 
   Future<Response> signup(
-      String username, String email, String password) async {
+    String username, String email, String password) async {
     final url = Uri.parse('${EndPoint.baseUrl}auth/signup');
 
     final response = await post(
@@ -47,22 +47,28 @@ class EndPointAuth extends EndPoint {
     return response;
   }
 
-  Future<Response> logout(String token) async {
+  Future<Response> logout(String token, String deviceId) async {
     final url = Uri.parse('${EndPoint.baseUrl}auth/logout');
 
     final response = await post(
       url,
       headers: headers(token),
+      body: jsonEncode({
+        'device_id': deviceId,
+      }),
     );
     return response;
   }
 
-  Future<Response> supportLogout(String token) async {
+  Future<Response> supportLogout(String token, String deviceId) async {
     final url = Uri.parse('${EndPoint.baseUrl}auth/support/logout');
 
     final response = await post(
       url,
       headers: headers(token),
+      body: jsonEncode({
+        'device_id': deviceId,
+      }),
     );
     return response;
   }

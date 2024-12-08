@@ -19,30 +19,42 @@ import 'package:namer_app/api/endpoints/endpoint_rating.dart';
 import 'package:namer_app/api/vending_machine.dart';
 import 'package:namer_app/api/endpoints/endpoint_vending_machine.dart';
 
-class BackendApi {
-    static var _initialized = false;
-    
-    static initialize(
-        {
-          EndPointAuth? endPointAuth,
-          EndPointNotification? endPointNotification,
-          EndPointOrder? endPointOrder,
-          EndPointProduct? endPointProduct,
-          EndPointPurchase? endPointPurchase,
-          EndPointRating? endPointRating,
-          EndPointVendingMachine? endPointVendingMachine
-        }
-    ) {
-        if (!_initialized) {
-            Auth.initialize(endPointAuth);
-            Notification.initialize(endPointNotification);
-            Order.initialize(endPointOrder);
-            Product.initialize(endPointProduct);
-            Purchase.initialize(endPointPurchase);
-            Rating.initialize(endPointRating);
-            VendingMachine.initialize(endPointVendingMachine);
+import 'package:namer_app/api/simple_report.dart';
+import 'package:namer_app/api/endpoints/endpoint_simple_report.dart';
 
-            _initialized = true;
-        }
-    }
+
+class BackendApi {
+  /*
+  This class is the main classe that initializes all the other classes that are used to interact with the backend.
+  */
+
+  Auth auth = Auth();
+  Notification notification = Notification();
+  Order order = Order();
+  Product product = Product();
+  Purchase purchase = Purchase();
+  Rating rating = Rating();
+  VendingMachine vendingMachine = VendingMachine();
+  SimpleReport simpleReport = SimpleReport();
+
+  BackendApi._privateConstructor();
+
+  static final BackendApi _instance = BackendApi._privateConstructor();
+
+  factory BackendApi() {
+    return _instance;
+  }
+  
+  initialize() {
+    auth.initialize(EndPointAuth());
+    auth.loadState();
+
+    notification.initialize(EndPointNotification());
+    order.initialize(EndPointOrder());
+    product.initialize(EndPointProduct());
+    purchase.initialize(EndPointPurchase());
+    rating.initialize(EndPointRating());
+    vendingMachine.initialize(EndPointVendingMachine());
+    simpleReport.initialize(EndPointSimpleReport());
+  }
 }

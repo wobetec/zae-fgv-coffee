@@ -5,9 +5,18 @@ import 'endpoints/endpoint_rating.dart';
 
 
 class Rating {
-  static EndPointRating? _ratingEndPoint;
+  EndPointRating? _ratingEndPoint;
+  Auth _auth = Auth();
 
-  static initialize(EndPointRating? ratingEndPoint, {bool force = false}) {
+  Rating._privateConstructor();
+
+  static final Rating _instance = Rating._privateConstructor();
+
+  factory Rating() {
+    return _instance;
+  }
+
+  initialize(EndPointRating? ratingEndPoint, {bool force = false}) {
     if (_ratingEndPoint == null || force) {
       _ratingEndPoint = ratingEndPoint;
     } else {
@@ -15,11 +24,11 @@ class Rating {
     }
   }
 
-  static Future<dynamic> rateProduct(String productId, int rating, String description) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> rateProduct(String productId, int rating, String description) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _ratingEndPoint!.rateProduct(Auth.getToken()!, productId, rating, description)
+    return await _ratingEndPoint!.rateProduct(_auth.getToken()!, productId, rating, description)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to rate product');
@@ -31,11 +40,11 @@ class Rating {
       });
   }
 
-  static Future<dynamic> getRating() async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getRating() async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _ratingEndPoint!.getRating(Auth.getToken()!)
+    return await _ratingEndPoint!.getRating(_auth.getToken()!)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get rating');
@@ -47,11 +56,11 @@ class Rating {
       });
   }
 
-  static Future<void> unrateProduct(String productId) async {
-    if (!Auth.hasToken()) {
+  Future<void> unrateProduct(String productId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    await _ratingEndPoint!.unrateProduct(Auth.getToken()!, productId)
+    await _ratingEndPoint!.unrateProduct(_auth.getToken()!, productId)
       .then((response) {
         if (response.statusCode != 204) {
           throw Exception('Failed to unrate product');

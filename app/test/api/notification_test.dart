@@ -13,24 +13,27 @@ import 'notification_test.mocks.dart';
 
 @GenerateMocks([EndPointNotification])
 void main(){
+  Auth auth = Auth();
+  Notification notification = Notification();
+
   group("Test registerDevice", (){
     test("Register device with correct token, registrationId, type and deviceId", () async {
       EndPointNotification endPointNotification = MockEndPointNotification();
-      when(endPointNotification.registerDevice("123", "123", "android", "123")).thenAnswer((_) async => Response('{"message": "Device registered"}', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Notification.initialize(endPointNotification, force: true);
+      when(endPointNotification.registerDevice("123", "123", "android", "123")).thenAnswer((_) async => Response('{"message": "Device registered"}', 201));
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      notification.initialize(endPointNotification, force: true);
 
-      await Notification.registerDevice("123", "android", "123");
+      await notification.registerDevice("123", "android", "123");
     });
 
     test("Register device with no token", () async {
       EndPointNotification endPointNotification = MockEndPointNotification();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Notification.initialize(endPointNotification, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      notification.initialize(endPointNotification, force: true);
 
-      expect(() async => await Notification.registerDevice("123", "android", "123"), throwsException);
+      expect(() async => await notification.registerDevice("123", "android", "123"), throwsException);
     });
   });
 }

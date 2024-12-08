@@ -1,5 +1,7 @@
+import 'package:namer_app/config.dart';
+
 class EndPoint {
-  static const String baseUrl = 'http://localhost:8080/';
+  static String baseUrl = Config.baseUrl;
 
   Map<String, String> headers(String? token) {
     Map<String, String> headers_ = {

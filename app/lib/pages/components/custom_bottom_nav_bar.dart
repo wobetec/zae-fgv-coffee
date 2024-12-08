@@ -1,4 +1,7 @@
+// lib/pages/components/custom_bottom_nav_bar.dart
+
 import 'package:flutter/material.dart';
+import '../constants.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -14,8 +17,8 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Color(0xFFEEF3FC),
-      selectedItemColor: Color(0xFFFF5722),
-      unselectedItemColor: Color(0xFF232323),
+      selectedItemColor: primaryColor,
+      unselectedItemColor: textColor,
       currentIndex: currentIndex,
       onTap: onTap,
       items: [
@@ -24,7 +27,11 @@ class CustomBottomNavBar extends StatelessWidget {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
+          icon: Icon(Icons.favorite),
+          label: 'Favorites',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
           label: 'Profile',
         ),
       ],

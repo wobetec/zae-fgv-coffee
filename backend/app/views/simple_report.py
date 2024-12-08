@@ -7,11 +7,13 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from django.db.models import Sum
 from datetime import datetime
 from app.models import VendingMachine, Order, Sell
+from app.permissions import IsSupportUser
+
 from app.views.report_builder import *
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsSupportUser])
 def daily_report(request):
     # Extract the date from the query parameters
     report_date_str = request.query_params.get("date")
@@ -20,7 +22,7 @@ def daily_report(request):
             {"error": "The 'date' parameter is required."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     try:
         # Parse the date
         report_date = datetime.strptime(report_date_str, "%Y-%m-%d").date()
@@ -29,16 +31,16 @@ def daily_report(request):
             {"error": "Invalid date format. Use 'YYYY-MM-DD'."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-    
+
     # Fetch vending machine data
     vending_machines = VendingMachine.objects.all()
     vending_machine_count = vending_machines.count()
-    
+
     # Fetch purchase data for the given date
     orders = Order.objects.filter(order_date__date=report_date)
     total_sales = orders.aggregate(Sum("order_total"))["order_total__sum"] or 0
     total_orders = orders.count()
-    
+
     # Fetch sold products for the given date
     sells = Sell.objects.filter(order__order_date__date=report_date)
     total_items_sold = sells.aggregate(Sum("sell_quantity"))["sell_quantity__sum"] or 0

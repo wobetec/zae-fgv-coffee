@@ -62,9 +62,6 @@ class AdminVendingMachineDetailPage extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 15),
                 ),
                 onPressed: () {
-                  // Simula o bloqueio da vending machine e imprime a mensagem
-                  print('A vending machine $vendingMachineName foi bloqueada');
-                  // Exibir uma mensagem de confirmação ao administrador
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(

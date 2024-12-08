@@ -13,25 +13,28 @@ import 'vending_machine_test.mocks.dart';
 
 @GenerateMocks([EndPointVendingMachine])
 void main(){
+  Auth auth = Auth();
+  VendingMachine vendingMachine = VendingMachine();
+
   group("Test getVendingMachines", (){
     test("Get vending machines with correct token", () async {
       EndPointVendingMachine endPointVendingMachine = MockEndPointVendingMachine();
       when(endPointVendingMachine.getVendingMachines("123")).thenAnswer((_) async => Response('[]', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      VendingMachine.initialize(endPointVendingMachine, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      vendingMachine.initialize(endPointVendingMachine, force: true);
 
-      dynamic vending_machines = await VendingMachine.getVendingMachines();
-      expect(vending_machines, []);
+      dynamic vendingMachines = await vendingMachine.getVendingMachines();
+      expect(vendingMachines, []);
     });
 
     test("Get vending machines with no token", () async {
       EndPointVendingMachine endPointVendingMachine = MockEndPointVendingMachine();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      VendingMachine.initialize(endPointVendingMachine, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      vendingMachine.initialize(endPointVendingMachine, force: true);
 
-      expect(() async => await VendingMachine.getVendingMachines(), throwsException);
+      expect(() async => await vendingMachine.getVendingMachines(), throwsException);
     });
   });
 }
