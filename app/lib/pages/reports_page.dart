@@ -2,11 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:namer_app/api/simple_report.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:namer_app/factory/date_selector_factory.dart';
 import 'package:namer_app/factory/date_selector.dart';
 import 'constants.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -44,8 +45,8 @@ class _ReportsPageState extends State<ReportsPage> {
     final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
     try {
-      SimpleReport simpleReport = SimpleReport();
-      final reportData = await simpleReport.getSimpleReport(dateStr);
+      APIs apis = APIs();
+      final reportData = await apis.simpleReport.getSimpleReport(dateStr);
       final content = reportData["content"] ?? "<p>No content</p>";
 
       setState(() {

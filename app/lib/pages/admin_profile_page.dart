@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:namer_app/api/auth.dart';
 import 'components/user_info_card.dart';
 import 'constants.dart';
 import 'reports_page.dart';
-import 'package:namer_app/fcm/fcm.dart';
 import 'home_page.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
@@ -24,9 +24,9 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   }
 
   Future<void> _loadPageDetail() async {
-    Auth auth = Auth();
+    APIs apis = APIs();
     setState(() {
-      supportName = auth.getUsername()!;
+      supportName = apis.auth.getUsername()!;
     });
   }
 
@@ -156,10 +156,7 @@ class OptionList extends StatelessWidget {
           title: 'Sign Out',
           onTap: () async {
             try {
-              Auth auth = Auth();
-              FCM fcm = FCM();
-              await auth.logout(fcm.deviceId!);
-              auth.deleteState();
+              APIs().logout();
             } catch (e) {
               print('Failed to logout. Please try again.');
               return;

@@ -5,10 +5,9 @@ import 'components/user_info_card.dart';
 import 'components/menu_option.dart';
 import 'order_history_page.dart';
 import 'constants.dart';
-
-import 'package:namer_app/api/auth.dart';
-import 'package:namer_app/fcm/fcm.dart';
 import 'home_page.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 
 class UserPage extends StatefulWidget {
@@ -51,19 +50,16 @@ class _UserPageState extends State<UserPage> {
 
   // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
-    Auth auth = Auth();
+    APIs apis = APIs();
     setState(() {
-      username = auth.getUsername() ?? 'User';
+      username = apis.auth.getUsername() ?? 'User';
     });
   }
 
   // Function to handle sign out
   void _signOut() async {
     try {
-      Auth auth = Auth();
-      FCM fcm = FCM();
-      await auth.logout(fcm.deviceId!);
-      auth.deleteState();
+      APIs().logout();
     } catch (e) {
       _showDialog('Error', 'Failed to logout. Please try again.');
       return;

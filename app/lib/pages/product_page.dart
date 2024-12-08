@@ -10,8 +10,8 @@ import 'components/star_rating.dart';
 import 'components/favorite_button.dart';
 import 'components/section.dart';
 import 'constants.dart';
-import 'package:namer_app/api/product.dart';
-import 'package:namer_app/api/purchase.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class ProductPage extends StatefulWidget {
   final Map<String, dynamic> productData;
@@ -53,8 +53,8 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<void> _loadFavoriteProducts() async {
-    Product product = Product();
-    dynamic favorites = await product.getFavoriteProducts();
+    APIs apis = APIs();
+    dynamic favorites = await apis.product.getFavoriteProducts();
 
     setState(() {
       _isFavorited = checkFavorite(favorites);
@@ -63,7 +63,7 @@ class _ProductPageState extends State<ProductPage> {
   }
 
   Future<void> _toggleFavorite() async {
-    Product product = Product();
+    APIs apis = APIs();
     final productData = widget.productData;
     final machineData = widget.stockData;
     final productId = productData['prod_id'];
@@ -71,12 +71,12 @@ class _ProductPageState extends State<ProductPage> {
 
     try {
       if (_isFavorited) {
-        await product.removeFavoriteProduct(productId, vmId);
+        await apis.product.removeFavoriteProduct(productId, vmId);
         setState(() {
           _isFavorited = false;
         });
       } else {
-        await product.addFavoriteProduct(productId, vmId);
+        await apis.product.addFavoriteProduct(productId, vmId);
         setState(() {
           _isFavorited = true;
         });
@@ -91,11 +91,10 @@ class _ProductPageState extends State<ProductPage> {
     final stock = widget.stockData;
     final productId = product['prod_id'];
     final vmId = stock["vending_machine"]['vm_id'];
-
-    Purchase purchase = Purchase();
+    APIs apis = APIs();
 
     try {
-      await purchase.purchase(vmId, [
+      await apis.purchase.purchase(vmId, [
         {'prod_id': productId, 'quantity': 1}
       ]);
 

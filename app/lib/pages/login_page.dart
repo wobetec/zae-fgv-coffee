@@ -1,16 +1,13 @@
 // lib/pages/login_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:namer_app/apis/apis.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
 import 'main_screen.dart';
-import 'admin_profile_page.dart'; // Importamos a página de perfil do admin
-
-import 'package:namer_app/api/auth.dart';
-import 'package:namer_app/api/notification.dart' as my_notification;
-import 'package:namer_app/fcm/fcm.dart';
+import 'admin_profile_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -42,20 +39,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      Auth auth = Auth();
-      await auth.login(
-        username, 
-        password, 
-        isAdmin ? UserType.support : UserType.user
-      );
-      auth.saveState();
-      my_notification.Notification notification = my_notification.Notification();
-      FCM fcm = FCM();
-      await notification.registerDevice(
-        fcm.registrationId!,
-        fcm.deviceType!,
-        fcm.deviceId!,
-      );
+      APIs().login(username, password, isAdmin);
     } catch (e) {
       _showDialog('Error', 'Failed to sign in. Please try again.');
       setState(() {

@@ -15,22 +15,15 @@ import 'pages/loading_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:namer_app/api/api.dart';
-import 'package:namer_app/fcm/fcm.dart';
 import 'package:namer_app/api/auth.dart';
-
+import 'package:namer_app/apis/apis.dart';
 
 Future<void> main() async {
   // Load environment variables from the .env file
   await dotenv.load(fileName: path.join('.env'));
 
   WidgetsFlutterBinding.ensureInitialized();
-
-  FCM fcm = FCM();
-  fcm.initialize();
-
-  BackendApi backendApi = BackendApi();
-  backendApi.initialize();
+  APIs().initialize();
 
   runApp(MyApp());
 }
