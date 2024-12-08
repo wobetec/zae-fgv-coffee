@@ -203,17 +203,36 @@
             
             <h4>Justificativa</h4>
             <p>
-                ------------
+                Inicialmente, o código foi projetado para notificar usuários quando o estoque de um produto favoritado se esgotasse. No entanto, caso fosse necessário adicionar novas notificações, como alertas para gestores, seria preciso duplicar partes significativas do código. A aplicação do Observer permite desacoplar os componentes, evitando redundâncias e facilitando a manutenção.
             </p>
             
             <h4>Como foi aplicado</h4>
             <p>
-                ------------
+                <ul>
+                    <li>
+                        <strong>Classe abstrata Observer</strong>: Define a interface para os observadores que serão notificados.
+                    </li>
+                    <li>
+                        <strong>Classe abstrata Subject</strong>: Gerencia a lista de observadores e garante que todos sejam notificados adequadamente.
+                    </li>
+                    <li>
+                        <strong>Classe concreta ZeroStockFavoriteProductsObserver</strong>: Observador responsável por notificar usuários que possuem o produto na wishlist.
+                    </li>
+                    <li>
+                        <strong>Classe concreta ZeroStockFavoriteProductsObserver</strong>: sujeito responsável por emitir notificações sempre que o estoque de um produto se esgota.
+                    </li>
+                </ul>
             </p>
             
             <h4>Impacto no Projeto</h4>
             <p>
-                ------------
+                A aplicação do padrão Observer trouxe maior modularidade ao sistema de notificações. Agora, novos tipos de notificações podem ser adicionados sem alterar o código existente, promovendo a escalabilidade e a facilidade de manutenção. Isso torna o sistema mais flexível para atender a diferentes requisitos de notificação no futuro.  
+            </p>
+
+
+            <h2>Conclusão</h2>
+            <p>
+                    A utilização dos padrões Singleton, Factory Method, Builder, Facade e Observer permitiu simplificar a estrutura do software, reduzir a duplicação de código e facilitar a adição de novas funcionalidades. Com a refatoração, o sistema tornou-se mais modular, flexível e preparado para futuras evoluções, garantindo uma base sólida para o desenvolvimento contínuo do projeto.
             </p>
         </div>
     </div>
