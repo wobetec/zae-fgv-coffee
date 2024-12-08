@@ -1,7 +1,10 @@
 // lib/pages/reports_page.dart
 
 import 'package:flutter/material.dart';
-import 'constants.dart'; // Importar o arquivo de constantes
+import 'package:intl/intl.dart';
+import 'package:namer_app/api/simple_report.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'constants.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -11,17 +14,130 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
-  // Map to keep track of selected reports using formatted date strings as keys
-  Map<String, bool> _selectedReports = {};
+  DateTime? _selectedDate;
+  bool _isLoading = false;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final now = DateTime.now();
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(now.year - 1),
+      lastDate: now,
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  Future<void> _generateReport() async {
+    if (_selectedDate == null) {
+      _showErrorDialog('No Date Selected', 'Please select a day to generate a report.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+
+    try {
+      final reportData = await SimpleReport.getSimpleReport(dateStr);
+      final content = reportData["content"] ?? "<p>No content</p>";
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showLargeDialog(content, dateStr);
+
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showErrorDialog('Error', 'Failed to generate the report. Please try again.');
+    }
+  }
+
+  void _showLargeDialog(String content, String dateStr) {
+    final screenSize = MediaQuery.of(context).size;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Container(
+          // Ajuste o tamanho conforme necessário. Aqui usamos 80% da largura e altura da tela.
+          width: screenSize.width * 0.8,
+          height: screenSize.height * 0.8,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Generated',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text('Report generated for: $dateStr'),
+              SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Html(
+                    data: content,
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedDate = null;
+                    });
+                  },
+                  child: Text('OK'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Generate a list of the last 7 dates without time
-    final List<DateTime> lastSevenDays = List.generate(7, (index) {
-      final date = DateTime.now().subtract(Duration(days: index));
-      // Normalize the date to midnight to ensure consistent comparison
-      return DateTime(date.year, date.month, date.day);
-    });
+    String selectedDateText = 'No date selected';
+    if (_selectedDate != null) {
+      selectedDateText = 'Selected date: ${DateFormat('dd/MM/yyyy').format(_selectedDate!)}';
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -38,182 +154,70 @@ class _ReportsPageState extends State<ReportsPage> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          // Instructional text below the AppBar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Select days to include in the report.',
+      body: Center( 
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Select a day to generate a report.',
               style: TextStyle(
                 fontSize: 20,
                 color: textColor,
                 fontFamily: 'Roboto-SemiBold',
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          // List of reports
-          Expanded(
-            child: ListView.builder(
-              itemCount: lastSevenDays.length,
-              itemBuilder: (context, index) {
-                final day = lastSevenDays[index];
-                final formattedDate = _formatDate(day);
-
-                final isSelected = _selectedReports[formattedDate] ?? false;
-
-                return ReportListItem(
-                  date: day,
-                  formattedDate: formattedDate,
-                  isSelected: isSelected,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _selectedReports[formattedDate] = value ?? false;
-                    });
-                  },
-                );
-              },
+            SizedBox(height: 16),
+            Text(
+              selectedDateText,
+              style: TextStyle(
+                fontSize: 16,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-          // "Generate Report" Button
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GenerateReportButton(
-              onPressed: () {
-                // Get the list of selected dates
-                final selectedDates = _selectedReports.entries
-                    .where((entry) => entry.value)
-                    .map((entry) => entry.key)
-                    .toList();
-
-                if (selectedDates.isEmpty) {
-                  // Show a message if no dates are selected
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('No Dates Selected'),
-                      content:
-                          Text('Please select at least one day to generate a report.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('OK'),
-                        ),
-                      ],
+            SizedBox(height: 16),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
+              ),
+              onPressed: () => _selectDate(context),
+              icon: Icon(Icons.calendar_today, color: Colors.white),
+              label: Text(
+                'Select Date',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontFamily: 'Roboto-Medium',
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            _isLoading
+                ? CircularProgressIndicator()
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
                     ),
-                  );
-                } else {
-                  // Simulate report generation and show confirmation
-                  print('Generating report for dates: $selectedDates');
-
-                  // Show a confirmation dialog
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Report Generated'),
-                      content: Text(
-                          'The report for the following dates has been generated:\n${selectedDates.join(', ')}'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('OK'),
-                        ),
-                      ],
+                    onPressed: _generateReport,
+                    child: Text(
+                      'Generate Report',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                        fontFamily: 'Roboto-Medium',
+                      ),
                     ),
-                  );
-
-                  // Clear the selections
-                  setState(() {
-                    _selectedReports.clear();
-                  });
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper function to format the date
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
-  }
-}
-
-// Updated ReportListItem to include a Checkbox
-class ReportListItem extends StatelessWidget {
-  final DateTime date;
-  final String formattedDate;
-  final bool isSelected;
-  final ValueChanged<bool?> onChanged;
-
-  const ReportListItem({
-    Key? key,
-    required this.date,
-    required this.formattedDate,
-    required this.isSelected,
-    required this.onChanged,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Checkbox(
-        value: isSelected,
-        onChanged: onChanged,
-        activeColor: primaryColor,
-      ),
-      title: Text(
-        'Report for $formattedDate',
-        style: TextStyle(
-          fontSize: 16,
-          color: textColor,
-          fontFamily: 'Roboto-SemiBold',
-        ),
-      ),
-      subtitle: Text(
-        'Generated report',
-        style: TextStyle(
-          fontSize: 14,
-          color: Color(0xFF80869A),
-          fontFamily: 'Roboto-Regular',
-        ),
-      ),
-      onTap: () {
-        // Toggle selection when the list item is tapped
-        onChanged(!isSelected);
-      },
-    );
-  }
-}
-
-// GenerateReportButton remains the same
-class GenerateReportButton extends StatelessWidget {
-  final VoidCallback onPressed;
-
-  const GenerateReportButton({Key? key, required this.onPressed})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: primaryColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100),
-        ),
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 24),
-      ),
-      onPressed: onPressed,
-      child: Text(
-        'Generate Report',
-        style: TextStyle(
-          fontSize: 14,
-          color: Colors.white, // Changed text color to white for better contrast
-          fontFamily: 'Roboto-Medium',
+                  ),
+          ],
         ),
       ),
     );

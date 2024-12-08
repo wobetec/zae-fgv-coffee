@@ -6,6 +6,7 @@ import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
 import 'main_screen.dart';
+import 'admin_profile_page.dart'; // Importamos a página de perfil do admin
 
 import 'package:namer_app/api/auth.dart';
 import 'package:namer_app/api/notification.dart' as my_notification;
@@ -17,28 +18,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // Controllers for user login
-  final _userUsernameController = TextEditingController();
-  final _userPasswordController = TextEditingController();
-
-  // Controllers for admin login
-  final _adminUsernameController = TextEditingController();
-  final _adminPasswordController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  bool isAdmin = false; // Switch state
-
-  // For hover effect on "Sign Up" text
+  bool isAdmin = false;
   bool _isHovering = false;
 
-  // Function to login as a regular user
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
 
-    String username = _userUsernameController.text.trim();
-    String password = _userPasswordController.text.trim();
+    String username = _usernameController.text.trim();
+    String password = _passwordController.text.trim();
 
     if (username.isEmpty || password.isEmpty) {
       _showDialog('Error', 'Please fill in all fields.');
@@ -49,7 +42,11 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      await Auth.login(username, password, isAdmin? UserType.support : UserType.user);
+      await Auth.login(
+        username, 
+        password, 
+        isAdmin ? UserType.support : UserType.user
+      );
       print('Logged OK');
       await my_notification.Notification.registerDevice(
         FCM.registrationId!,
@@ -63,19 +60,25 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
       return;
-    } 
+    }
 
-    // Navigate to MainScreen
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MainScreen()),
-    );
+    // Se isAdmin == true, vai para AdminProfilePage. Caso contrário, vai para MainScreen.
+    if (isAdmin) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AdminProfilePage()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    }
 
     setState(() {
       _isLoading = false;
     });
   }
-
 
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
     showDialog(
@@ -100,31 +103,30 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _userUsernameController.dispose();
-    _userPasswordController.dispose();
-    _adminUsernameController.dispose();
-    _adminPasswordController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Define maximum widths for input fields and buttons
-    double maxInputFieldWidth = 800.0; // Input fields max width
-    double maxButtonWidth = 500.0;     // Buttons max width
+    double maxInputFieldWidth = 800.0; 
+    double maxButtonWidth = 500.0;
+
+    final appBarTitle = isAdmin ? 'Sign In as Admin' : 'Sign In';
+    final buttonText = isAdmin ? 'Sign In as Admin' : 'Sign In';
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          isAdmin ? 'Sign In as Admin' : 'Sign In',
+          appBarTitle,
           style: TextStyle(color: textColor),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: IconThemeData(color: textColor),
         actions: [
-          // Switch in the AppBar
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: UserAdminSwitch(
@@ -139,66 +141,42 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       body: Center(
-        child: SingleChildScrollView( // Handles overflow on smaller screens
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(height: 30),
-              // Conditional rendering based on isAdmin
-              if (isAdmin) ...[
-                // Admin login form
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
-                  child: CustomInputField(
-                    controller: _adminUsernameController,
-                    label: 'Username',
-                  ),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _usernameController,
+                  label: 'Username',
                 ),
-                SizedBox(height: 20),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
-                  child: CustomInputField(
-                    controller: _adminPasswordController,
-                    label: 'Password',
-                    obscureText: true,
-                  ),
+              ),
+              SizedBox(height: 20),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
+                child: CustomInputField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  obscureText: true,
                 ),
-              ] else ...[
-                // User login form
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
-                  child: CustomInputField(
-                    controller: _userUsernameController,
-                    label: 'Username',
-                  ),
-                ),
-                SizedBox(height: 20),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
-                  child: CustomInputField(
-                    controller: _userPasswordController,
-                    label: 'Password',
-                    obscureText: true,
-                  ),
-                ),
-              ],
+              ),
               SizedBox(height: 30),
-              // Sign In button
               _isLoading
                   ? CircularProgressIndicator()
                   : ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: maxButtonWidth),
                       child: CustomButton(
-                        text: isAdmin ? 'Sign In as Admin' : 'Sign In',
+                        text: buttonText,
                         onPressed: _login,
                         backgroundColor: primaryColor,
                         textColor: Colors.white,
-                        width: double.infinity, // Button fills available width
+                        width: double.infinity,
                       ),
                     ),
               if (!isAdmin) ...[
                 SizedBox(height: 20),
-                // Sign Up option for users
                 ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: maxInputFieldWidth),
                   child: RichText(
