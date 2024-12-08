@@ -1,10 +1,111 @@
-// lib/pages/reports_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:namer_app/api/simple_report.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'constants.dart';
+
+abstract class ReportDialog {
+  Widget createButton();
+
+  void show(BuildContext context, String content, String dateStr);
+}
+
+class AndroidReportDialog extends ReportDialog {
+  @override
+  Widget createButton() {
+    return ElevatedButton(
+      onPressed: () {
+      },
+      child: Text('OK'),
+    );
+  }
+
+  @override
+  void show(BuildContext context, String content, String dateStr) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Report Generated'),
+        content: SingleChildScrollView(
+          child: Html(data: content),
+        ),
+        actions: [
+          createButton(),
+        ],
+      ),
+    );
+  }
+}
+
+class WebReportDialog extends ReportDialog {
+  @override
+  Widget createButton() {
+    return TextButton(
+      onPressed: () {
+      },
+      child: Text('OK'),
+    );
+  }
+
+  @override
+  void show(BuildContext context, String content, String dateStr) {
+    final screenSize = MediaQuery.of(context).size;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+        child: Container(
+          width: screenSize.width * 0.8,
+          height: screenSize.height * 0.8,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Report Generated',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text('Report generated for: $dateStr'),
+              SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Html(
+                    data: content,
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: createButton(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ReportDialogFactory {
+  final String platform;
+
+  ReportDialogFactory(this.platform);
+
+  ReportDialog createDialog() {
+    if (platform == 'android') {
+      return AndroidReportDialog();
+    } else if (platform == 'web') {
+      return WebReportDialog();
+    } else {
+      throw Exception('Unsupported platform');
+    }
+  }
+}
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -53,7 +154,11 @@ class _ReportsPageState extends State<ReportsPage> {
         _isLoading = false;
       });
 
-      _showLargeDialog(content, dateStr);
+      final platform = (Theme.of(context).platform == TargetPlatform.android)
+          ? 'android'
+          : 'web';
+      final reportDialog = ReportDialogFactory(platform).createDialog();
+      reportDialog.show(context, content, dateStr);
 
     } catch (e) {
       setState(() {
@@ -62,57 +167,6 @@ class _ReportsPageState extends State<ReportsPage> {
 
       _showErrorDialog('Error', 'Failed to generate the report. Please try again.');
     }
-  }
-
-  void _showLargeDialog(String content, String dateStr) {
-    final screenSize = MediaQuery.of(context).size;
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Container(
-          // Ajuste o tamanho conforme necessário. Aqui usamos 80% da largura e altura da tela.
-          width: screenSize.width * 0.8,
-          height: screenSize.height * 0.8,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Report Generated',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text('Report generated for: $dateStr'),
-              SizedBox(height: 20),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Html(
-                    data: content,
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    setState(() {
-                      _selectedDate = null;
-                    });
-                  },
-                  child: Text('OK'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _showErrorDialog(String title, String message) {
