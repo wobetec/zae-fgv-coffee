@@ -10,7 +10,7 @@ import pymysql
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-wv8nz066txop737q@o572jn*+l*huyb6ilsbulvz5(ca2e(4me"
-DEBUG = True
+DEBUG = os.getenv('ENV') != 'PROD'
 
 ALLOWED_HOSTS = ['*']
 
