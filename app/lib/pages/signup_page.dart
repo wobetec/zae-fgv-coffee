@@ -6,9 +6,7 @@ import 'components/custom_button.dart';
 import 'constants.dart';
 import 'main_screen.dart';
 
-import 'package:namer_app/api/auth.dart';
-import 'package:namer_app/api/notification.dart' as my_notification;
-import 'package:namer_app/fcm/fcm.dart';
+import 'package:namer_app/apis/apis.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -43,17 +41,7 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      Auth auth = Auth();
-      await auth.signup(username, email, password);
-      auth.saveState();
-
-      my_notification.Notification notification = my_notification.Notification();
-      FCM fcm = FCM();
-      await notification.registerDevice(
-        fcm.registrationId!,
-        fcm.deviceType!,
-        fcm.deviceId!,
-      );
+      APIs().signup(username, email, password);
     } catch (e) {
       _showDialog('Error', 'Failed to sign up. Please try again.');
     }
