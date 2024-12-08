@@ -41,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       APIs().login(username, password, isAdmin);
     } catch (e) {
+      print('Error: $e');
       _showDialog('Error', 'Failed to sign in. Please try again.');
       setState(() {
         _isLoading = false;
@@ -48,7 +49,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Se isAdmin == true, vai para AdminProfilePage. Caso contrário, vai para MainScreen.
     if (isAdmin) {
       Navigator.pushReplacement(
         context,
@@ -64,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
+
   }
 
   void _showDialog(String title, String message, {VoidCallback? onOk}) {

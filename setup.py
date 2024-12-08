@@ -30,19 +30,19 @@ def setup_envs():
         with open(path, 'w') as f:
             for key, value in env.items():
                 f.write(f'{key}="{value}"\n')
-    
-    default_env = {
+
+    backend_env = {
         'DJANGO_HOST': "0.0.0.0",
         'DJANGO_PORT': "8080",
         'GOOGLE_CLOUD_PROJECT': "zae-fgv-coffee",
-    }
-
-    backend_env = {
         'ENV': 'DEV',
-        **default_env
     }
 
-    frontend_env = {**default_env}
+    frontend_env = {
+        'DJANGO_HOST': "localhost",
+        'DJANGO_PORT': "8080",
+        'GOOGLE_CLOUD_PROJECT': "zae-fgv-coffee",
+    }
 
     write_env(backend_env, './backend/.env')
     write_env(frontend_env, './app/.env')

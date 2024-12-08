@@ -11,6 +11,7 @@ from app.permissions import IsSupportUser
 
 from app.views.report_builder import *
 
+
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated, IsSupportUser])

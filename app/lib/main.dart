@@ -35,6 +35,7 @@ class MyApp extends StatelessWidget {
   Future<UserType?> _checkLoginStatus() async {
     Auth auth = Auth();
     bool isLogged = await auth.checkToken();
+    print('isLogged: $isLogged');
     if (!isLogged) {
       return null;
     }

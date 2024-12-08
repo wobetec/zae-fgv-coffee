@@ -6,13 +6,14 @@ from app import models, factories
 from datetime import datetime
 import random
 
+
 class VendingMachineReportTests(APITestCase):
     def setUp(self):
         # Create user and token
         self.url = reverse("app:daily_report")
         self.user = models.User.objects.create(username="testuser")
         self.user.set_password("testpassword")
-        self.user.save()
+        self.support_user = models.SupportUser.objects.create(user=self.user)
         self.token = Token.objects.create(user=self.user)
 
         # Create data for the report
