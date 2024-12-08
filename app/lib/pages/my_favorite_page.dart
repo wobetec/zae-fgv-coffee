@@ -53,8 +53,9 @@ class _MyFavoritePageState extends State<MyFavoritePage> {
                     final favorite = favoriteProducts[index];
                     // Aqui extraímos o produto do objeto 'favorite'
                     final product = favorite['product'];
+                    final vendingMachine = favorite['vending_machine'];
                     return ListTile(
-                      title: Text(product['prod_name'] ?? 'Unnamed product'),
+                      title: Text("Floor ${vendingMachine['vm_floor']} - ${product['prod_name']}" ),
                       subtitle: Text('Price: \$${product['prod_price'] ?? '--'}'),
                     );
                   },

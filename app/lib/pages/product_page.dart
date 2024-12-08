@@ -41,7 +41,6 @@ class _ProductPageState extends State<ProductPage> {
 
   bool checkFavorite(List<dynamic> favorites) {
     final productData = widget.productData;
-    print(productData);
 
     for (dynamic favorite in favorites) {
       final String prodId = favorite["product"]["prod_id"];
@@ -90,9 +89,6 @@ class _ProductPageState extends State<ProductPage> {
     final stock = widget.stockData;
     final productId = product['prod_id'];
     final vmId = stock["vending_machine"]['vm_id'];
-
-    print(productId);
-    print(vmId);
 
     try {
       final result = await Purchase.purchase(vmId, [

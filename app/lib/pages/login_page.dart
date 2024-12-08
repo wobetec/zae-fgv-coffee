@@ -47,13 +47,11 @@ class _LoginPageState extends State<LoginPage> {
         password, 
         isAdmin ? UserType.support : UserType.user
       );
-      print('Logged OK');
       await my_notification.Notification.registerDevice(
         FCM.registrationId!,
         FCM.deviceType!,
         FCM.deviceId!,
       );
-      print('Notification OK');
     } catch (e) {
       _showDialog('Error', 'Failed to sign in. Please try again.');
       setState(() {

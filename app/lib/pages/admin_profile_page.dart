@@ -3,7 +3,9 @@
 import 'package:flutter/material.dart';
 import 'reports_page.dart';
 import 'login_page.dart';
-import 'constants.dart'; // Importar o arquivo de constantes
+import 'constants.dart';
+import 'package:namer_app/api/auth.dart';
+import 'components/user_info_card.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
@@ -13,8 +15,19 @@ class AdminProfilePage extends StatefulWidget {
 }
 
 class _AdminProfilePageState extends State<AdminProfilePage> {
-  String adminName = 'Marcelo';
-  String adminEmail = 'marcelo@gmail.com';
+  String supportName = 'Support';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPageDetail();
+  }
+
+  Future<void> _loadPageDetail() async {
+    setState(() {
+      supportName = Auth.getUsername()!;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +47,11 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
           // Cabeçalho indicando o papel do usuário
           ProfileHeader(title: 'Admin'),
           // Cartão com informações do perfil
-          ProfileCard(name: adminName, email: adminEmail),
-          // Lista de opções
+          UserInfoCard(
+            username: supportName,
+            textColor: textColor,
+            cardColor: Color(0xFFE2E2E2),
+          ),
           Expanded(child: OptionList()),
         ],
       ),

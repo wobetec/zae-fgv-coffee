@@ -1,7 +1,6 @@
 // lib/pages/user_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'components/user_info_card.dart';
 import 'components/menu_option.dart';
 import 'order_history_page.dart';
@@ -52,9 +51,8 @@ class _UserPageState extends State<UserPage> {
 
   // Function to load user data from SharedPreferences
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? 'User';
+      username = Auth.getUsername() ?? 'User';
     });
   }
 

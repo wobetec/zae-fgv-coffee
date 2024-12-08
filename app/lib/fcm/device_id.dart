@@ -2,19 +2,12 @@ import 'dart:io';
 import 'package:android_id/android_id.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
 import 'package:uuid/uuid.dart';
 
 class DeviceId {
   static Future<String?> getId() async {
     if (kIsWeb) {
-      final uuid = html.window.localStorage['deviceId'];
-      if (uuid != null) {
-        return uuid;
-      }
       final newUuid = const Uuid().v4();
-      html.window.localStorage['deviceId'] = newUuid;
       return newUuid;
     } else if (Platform.isAndroid) {
       const androidIdPlugin = AndroidId();

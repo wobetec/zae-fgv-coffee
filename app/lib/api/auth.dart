@@ -20,8 +20,7 @@ class Auth {
     }
   }
 
-  static Future<void> login(
-      String username, String password, UserType userType) async {
+  static Future<void> login(String username, String password, UserType userType) async {
     if (userType == UserType.user) {
       await _endPointAuth!.login(username, password).then((response) {
         if (response.statusCode == 200) {

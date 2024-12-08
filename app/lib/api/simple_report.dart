@@ -16,14 +16,12 @@ class SimpleReport {
   }
 
   static Future<dynamic> getSimpleReport(String date) async {
-    print(date);
     if (!Auth.hasToken()) {
       throw Exception('No token');
     }
     return await _endPointSimpleReport!
         .getSimpleReport(Auth.getToken()!, date)
         .then((response) {
-          print(response);
       if (response.statusCode != 200) {
         throw Exception('Failed to get SimpleReports');
       }
