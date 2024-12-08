@@ -5,12 +5,14 @@ import 'package:flutter/material.dart';
 class VendingMachineCard extends StatelessWidget {
   final String name;
   final String floor;
+  final String stockQuantity;
   final VoidCallback onTap;
 
   const VendingMachineCard({
     Key? key,
     required this.name,
     required this.floor,
+    required this.stockQuantity,
     required this.onTap,
   }) : super(key: key);
 

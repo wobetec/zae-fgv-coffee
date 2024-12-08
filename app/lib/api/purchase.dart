@@ -15,7 +15,7 @@ class Purchase {
     }
   }
 
-  static Future<dynamic> purchase(String vmId, List<Map<String, int>> products) async {
+  static Future<dynamic> purchase(String vmId, List<Map<String, dynamic>> products) async {
     if (!Auth.hasToken()) {
       throw Exception('No token');
     }

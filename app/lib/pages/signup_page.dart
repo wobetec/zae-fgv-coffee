@@ -41,6 +41,7 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
+      print("$username, $email, $password");
       await Auth.signup(username, email, password);
     } catch (e) {
       _showDialog('Error', 'Failed to sign up. Please try again.');
@@ -92,7 +93,7 @@ class _SignupPageState extends State<SignupPage> {
   Widget build(BuildContext context) {
     // Define maximum widths for input fields and buttons
     double maxInputFieldWidth = 800.0; // Input fields max width
-    double maxButtonWidth = 500.0;     // Buttons max width
+    double maxButtonWidth = 500.0; // Buttons max width
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -108,7 +109,8 @@ class _SignupPageState extends State<SignupPage> {
         iconTheme: IconThemeData(color: textColor),
       ),
       body: Center(
-        child: SingleChildScrollView( // Handles overflow on smaller screens
+        child: SingleChildScrollView(
+          // Handles overflow on smaller screens
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

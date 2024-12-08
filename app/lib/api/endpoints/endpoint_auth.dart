@@ -31,8 +31,10 @@ class EndPointAuth extends EndPoint {
     return response;
   }
 
-  Future<Response> signup(String username, String email, String password) async {
+  Future<Response> signup(
+      String username, String email, String password) async {
     final url = Uri.parse('${EndPoint.baseUrl}auth/signup');
+    print("$url");
 
     final response = await post(
       url,

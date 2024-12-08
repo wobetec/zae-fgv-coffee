@@ -27,9 +27,6 @@ class _HomeAppPageState extends State<HomeAppPage> {
 
   Future<void> _loadProducts() async {
     List<dynamic> products = await Product.getProducts();
-    List<dynamic> vending_machines = await VendingMachine.getVendingMachines();
-    print(vending_machines);
-
     setState(() {
       _products = products;
     });

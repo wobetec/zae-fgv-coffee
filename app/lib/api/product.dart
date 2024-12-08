@@ -68,7 +68,7 @@ class Product {
     }
     return await _endPointProduct!.addFavoriteProduct(Auth.getToken()!, productId, vmId)
       .then((response) {
-        if (response.statusCode != 200) {
+        if (response.statusCode != 201) {
           throw Exception('Failed to add favorite product');
         }
         return jsonDecode(response.body);
