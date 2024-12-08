@@ -1,54 +1,69 @@
+// lib/pages/reports_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:namer_app/api/simple_report.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:namer_app/factory/date_selector_factory.dart';
+import 'package:namer_app/factory/date_selector.dart';
 import 'constants.dart';
 
-abstract class ReportDialog {
-  Widget createButton();
+class ReportsPage extends StatefulWidget {
+  const ReportsPage({Key? key}) : super(key: key);
 
-  void show(BuildContext context, String content, String dateStr);
+  @override
+  _ReportsPageState createState() => _ReportsPageState();
 }
 
-class AndroidReportDialog extends ReportDialog {
-  @override
-  Widget createButton() {
-    return ElevatedButton(
-      onPressed: () {
-      },
-      child: Text('OK'),
-    );
+class _ReportsPageState extends State<ReportsPage> {
+  DateTime? _selectedDate;
+  bool _isLoading = false;
+
+  // Instancia o seletor de data usando a fábrica
+  final DateSelector _dateSelector = DateSelectorFactory.getDateSelector();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await _dateSelector.selectDate(context);
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 
-  @override
-  void show(BuildContext context, String content, String dateStr) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Report Generated'),
-        content: SingleChildScrollView(
-          child: Html(data: content),
-        ),
-        actions: [
-          createButton(),
-        ],
-      ),
-    );
-  }
-}
+  Future<void> _generateReport() async {
+    if (_selectedDate == null) {
+      _showErrorDialog('No Date Selected', 'Please select a day to generate a report.');
+      return;
+    }
 
-class WebReportDialog extends ReportDialog {
-  @override
-  Widget createButton() {
-    return TextButton(
-      onPressed: () {
-      },
-      child: Text('OK'),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+
+    try {
+      SimpleReport simpleReport = SimpleReport();
+      final reportData = await simpleReport.getSimpleReport(dateStr);
+      final content = reportData["content"] ?? "<p>No content</p>";
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showLargeDialog(content, dateStr);
+
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showErrorDialog('Error', 'Failed to generate the report. Please try again.');
+    }
   }
 
-  @override
-  void show(BuildContext context, String content, String dateStr) {
+  void _showLargeDialog(String content, String dateStr) {
     final screenSize = MediaQuery.of(context).size;
 
     showDialog(
@@ -81,92 +96,21 @@ class WebReportDialog extends ReportDialog {
               ),
               Align(
                 alignment: Alignment.centerRight,
-                child: createButton(),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedDate = null;
+                    });
+                  },
+                  child: Text('OK'),
+                ),
               ),
             ],
           ),
         ),
       ),
     );
-  }
-}
-
-class ReportDialogFactory {
-  final String platform;
-
-  ReportDialogFactory(this.platform);
-
-  ReportDialog createDialog() {
-    if (platform == 'android') {
-      return AndroidReportDialog();
-    } else if (platform == 'web') {
-      return WebReportDialog();
-    } else {
-      throw Exception('Unsupported platform');
-    }
-  }
-}
-
-class ReportsPage extends StatefulWidget {
-  const ReportsPage({Key? key}) : super(key: key);
-
-  @override
-  _ReportsPageState createState() => _ReportsPageState();
-}
-
-class _ReportsPageState extends State<ReportsPage> {
-  DateTime? _selectedDate;
-  bool _isLoading = false;
-
-  Future<void> _selectDate(BuildContext context) async {
-    final now = DateTime.now();
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(now.year - 1),
-      lastDate: now,
-    );
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> _generateReport() async {
-    if (_selectedDate == null) {
-      _showErrorDialog('No Date Selected', 'Please select a day to generate a report.');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
-
-    try {
-      SimpleReport simpleReport = SimpleReport();
-      final reportData = await simpleReport.getSimpleReport(dateStr);
-      final content = reportData["content"] ?? "<p>No content</p>";
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      final platform = (Theme.of(context).platform == TargetPlatform.android)
-          ? 'android'
-          : 'web';
-      final reportDialog = ReportDialogFactory(platform).createDialog();
-      reportDialog.show(context, content, dateStr);
-
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      _showErrorDialog('Error', 'Failed to generate the report. Please try again.');
-    }
   }
 
   void _showErrorDialog(String title, String message) {
@@ -209,7 +153,7 @@ class _ReportsPageState extends State<ReportsPage> {
           },
         ),
       ),
-      body: Center( 
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
