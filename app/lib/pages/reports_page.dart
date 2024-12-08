@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:namer_app/api/simple_report.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:namer_app/factory/date_selector_factory.dart';
+import 'package:namer_app/factory/date_selector.dart';
 import 'constants.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({Key? key}) : super(key: key);
@@ -17,14 +20,11 @@ class _ReportsPageState extends State<ReportsPage> {
   DateTime? _selectedDate;
   bool _isLoading = false;
 
+  // Instancia o seletor de data usando a fábrica
+  final DateSelector _dateSelector = DateSelectorFactory.getDateSelector();
+
   Future<void> _selectDate(BuildContext context) async {
-    final now = DateTime.now();
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(now.year - 1),
-      lastDate: now,
-    );
+    final DateTime? picked = await _dateSelector.selectDate(context);
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -45,7 +45,8 @@ class _ReportsPageState extends State<ReportsPage> {
     final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
     try {
-      final reportData = await SimpleReport.getSimpleReport(dateStr);
+      APIs apis = APIs();
+      final reportData = await apis.simpleReport.getSimpleReport(dateStr);
       final content = reportData["content"] ?? "<p>No content</p>";
 
       setState(() {
@@ -71,7 +72,6 @@ class _ReportsPageState extends State<ReportsPage> {
       builder: (context) => Dialog(
         insetPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Container(
-          // Ajuste o tamanho conforme necessário. Aqui usamos 80% da largura e altura da tela.
           width: screenSize.width * 0.8,
           height: screenSize.height * 0.8,
           padding: EdgeInsets.all(16),
@@ -154,7 +154,7 @@ class _ReportsPageState extends State<ReportsPage> {
           },
         ),
       ),
-      body: Center( 
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

@@ -2,16 +2,29 @@ import 'dart:convert';
 
 import 'endpoints/endpoint_auth.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+
 enum UserType { user, support }
 
 class Auth {
-  static String? _token;
-  static EndPointAuth? _endPointAuth;
-  static UserType? _userType;
-  static String? _username;
+  /*
+  Handle the authentication of the user and manage the access token.
+  */
+  String? _token;
+  EndPointAuth? _endPointAuth;
+  UserType? _userType;
+  String? _username;
 
-  static initialize(EndPointAuth? endPointAuth,
-      {bool force = false, bool resetToken = false}) {
+  Auth._privateConstructor();
+
+  static final Auth _instance = Auth._privateConstructor();
+
+  factory Auth() {
+    return _instance;
+  }
+
+  void initialize(EndPointAuth? endPointAuth, {bool force = false, bool resetToken = false}) {
     if (resetToken) _token = null;
     if (_endPointAuth == null || force) {
       _endPointAuth = endPointAuth;
@@ -20,7 +33,33 @@ class Auth {
     }
   }
 
-  static Future<void> login(String username, String password, UserType userType) async {
+  void loadState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (prefs.getString('token') == null) return;
+    if (prefs.getString('username') == null) return;
+    if (prefs.getInt('userType') == null) return;
+
+    _token = prefs.getString('token');
+    _username = prefs.getString('username');
+    _userType = UserType.values[prefs.getInt('userType') ?? 0];
+  }
+
+  void saveState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', _token!);
+    prefs.setString('username', _username!);
+    prefs.setInt('userType', _userType!.index);
+  }
+
+  void deleteState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+    prefs.remove('username');
+    prefs.remove('userType');
+  }
+
+  Future<void> login(String username, String password, UserType userType) async {
     if (userType == UserType.user) {
       await _endPointAuth!.login(username, password).then((response) {
         if (response.statusCode == 200) {
@@ -47,7 +86,7 @@ class Auth {
     _userType = userType;
   }
 
-  static Future<void> logout(String deviceId) async {
+  Future<void> logout(String deviceId) async {
     if (_token != null) {
       if (_userType == UserType.user) {
         await _endPointAuth!.logout(_token!, deviceId).then((response) {
@@ -77,26 +116,27 @@ class Auth {
     }
   }
 
-  static Future<void> signup(
-      String username, String email, String password) async {
-    await _endPointAuth!.signup(username, email, password).then((response) {
-      if (response.statusCode == 201) {
-        _token = jsonDecode(response.body)['token'];
-        _username = username;
-      } else {
+  Future<void> signup(String username, String email, String password) async {
+    await _endPointAuth!.signup(username, email, password)
+      .then((response) {
+        if (response.statusCode == 201) {
+          _token = jsonDecode(response.body)['token'];
+          _username = username;
+        } else {
+          throw Exception('Failed to signup');
+        }
+      })
+      .catchError((error) {
         throw Exception('Failed to signup');
-      }
-    }).catchError((error) {
-      throw Exception('Failed to signup');
-    });
+      });
     _userType = UserType.user;
   }
 
-  static bool hasToken() {
+  bool hasToken() {
     return _token != null;
   }
 
-  static Future<bool> checkToken() async {
+  Future<bool> checkToken() async {
     if (_token != null) {
       if (_userType == UserType.user) {
         return await _endPointAuth!.testToken(_token!).then((response) {
@@ -123,23 +163,23 @@ class Auth {
     return false;
   }
 
-  static String? getToken() {
+  String? getToken() {
     return _token;
   }
 
-  static void setToken(String token) {
+  void setToken(String token) {
     _token = token;
   }
 
-  static UserType? getUserType() {
+  UserType? getUserType() {
     return _userType;
   }
 
-  static void setUserType(UserType userType) {
+  void setUserType(UserType userType) {
     _userType = userType;
   }
 
-  static String? getUsername() {
+  String? getUsername() {
     return _username;
   }
 }

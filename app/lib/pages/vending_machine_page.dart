@@ -1,10 +1,8 @@
 // lib/pages/vending_machine_page.dart
 
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'product_page.dart';
 import 'components/vending_machine_card.dart';
-import 'package:namer_app/api/vending_machine.dart';
 
 class VendingMachinePage extends StatefulWidget {
   final Map<String, dynamic> productData;

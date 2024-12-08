@@ -13,25 +13,29 @@ import 'product_test.mocks.dart';
 
 @GenerateMocks([EndPointProduct])
 void main(){
+  Auth auth = Auth();
+  Product product = Product();
+
   group("Test getProduct", (){
     test("Get product with correct token and productId", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
       when(endPointProduct.getProduct("123", "123")).thenAnswer((_) async => Response('{"prod_id": "123"}', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
 
-      dynamic product = await Product.getProduct("123");
-      expect(product, {"prod_id": "123"});
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
+
+      dynamic productResult = await product.getProduct("123");
+      expect(productResult, {"prod_id": "123"});
     });
 
     test("Get product with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.getProduct("123"), throwsException);
+      expect(() async => await product.getProduct("123"), throwsException);
     });
   });
 
@@ -39,21 +43,21 @@ void main(){
     test("Get products with correct token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
       when(endPointProduct.getProducts("123")).thenAnswer((_) async => Response('[]', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
 
-      dynamic products = await Product.getProducts();
+      dynamic products = await product.getProducts();
       expect(products, []);
     });
 
     test("Get products with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.getProducts(), throwsException);
+      expect(() async => await product.getProducts(), throwsException);
     });
   });
 
@@ -61,43 +65,43 @@ void main(){
     test("Get favorite products with correct token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
       when(endPointProduct.getFavoriteProducts("123")).thenAnswer((_) async => Response('[]', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
 
-      dynamic wishlist = await Product.getFavoriteProducts();
+      dynamic wishlist = await product.getFavoriteProducts();
       expect(wishlist, []);
     });
 
     test("Get favorite products with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.getFavoriteProducts(), throwsException);
+      expect(() async => await product.getFavoriteProducts(), throwsException);
     });
   });
 
   group("Test addFavoriteProduct", (){
     test("Add favorite product with correct token, productId and vmId", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
-      when(endPointProduct.addFavoriteProduct("123", "123", "123")).thenAnswer((_) async => Response('{}', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
+      when(endPointProduct.addFavoriteProduct("123", "123", "123")).thenAnswer((_) async => Response('{}', 201));
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
 
-      dynamic wishlist = await Product.addFavoriteProduct("123", "123");
+      dynamic wishlist = await product.addFavoriteProduct("123", "123");
       expect(wishlist, {});
     });
 
     test("Add favorite product with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.addFavoriteProduct("123", "123"), throwsException);
+      expect(() async => await product.addFavoriteProduct("123", "123"), throwsException);
     });
   });
 
@@ -105,20 +109,20 @@ void main(){
     test("Remove favorite product with correct token, productId and vmId", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
       when(endPointProduct.removeFavoriteProduct("123", "123", "123")).thenAnswer((_) async => Response('{"message": "Product removed from favorite"}', 204));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
 
-      await Product.removeFavoriteProduct("123", "123");
+      await product.removeFavoriteProduct("123", "123");
     });
 
     test("Remove favorite product with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.removeFavoriteProduct("123", "123"), throwsException);
+      expect(() async => await product.removeFavoriteProduct("123", "123"), throwsException);
     });
   });
 
@@ -126,21 +130,21 @@ void main(){
     test("Get ratings with correct token and productId", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
       when(endPointProduct.getRatings("123", "123")).thenAnswer((_) async => Response('[]', 200));
-      Auth.initialize(EndPointAuth(), force: true);
-      Auth.setToken("123");
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true);
+      auth.setToken("123");
+      product.initialize(endPointProduct, force: true);
 
-      dynamic ratings = await Product.getRatings("123");
+      dynamic ratings = await product.getRatings("123");
       expect(ratings, []);
     });
 
     test("Get ratings with no token", () async {
       EndPointProduct endPointProduct = MockEndPointProduct();
 
-      Auth.initialize(EndPointAuth(), force: true, resetToken: true);
-      Product.initialize(endPointProduct, force: true);
+      auth.initialize(EndPointAuth(), force: true, resetToken: true);
+      product.initialize(endPointProduct, force: true);
 
-      expect(() async => await Product.getRatings("123"), throwsException);
+      expect(() async => await product.getRatings("123"), throwsException);
     });
   });
 }

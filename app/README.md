@@ -18,6 +18,12 @@ Run the app
 
 Here you'll be asked for the platform, just choose the one you want to run the app on.
 
+#### Android
+
+To run the app on an Android emulator, you need to have the emulator running before running the app and you need to change .env file:
+
+    DJANGO_HOST="localhost" -> shold be the IP of the machine running the backend
+
 ### Tests
 
 First, you need to create the mockito mock

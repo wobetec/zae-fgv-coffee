@@ -1,7 +1,8 @@
 // lib/pages/my_favorite_page.dart
 
 import 'package:flutter/material.dart';
-import 'package:namer_app/api/product.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class MyFavoritePage extends StatefulWidget {
   const MyFavoritePage({Key? key}) : super(key: key);
@@ -22,7 +23,8 @@ class _MyFavoritePageState extends State<MyFavoritePage> {
 
   Future<void> _loadFavoriteProducts() async {
     try {
-      final favorites = await Product.getFavoriteProducts();
+      APIs apis = APIs();
+      final favorites = await apis.product.getFavoriteProducts();
       setState(() {
         favoriteProducts = favorites;
         isLoading = false;

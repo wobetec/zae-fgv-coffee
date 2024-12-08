@@ -85,8 +85,11 @@ def logout(request):
             )
 
         # Delete device
-        device = get_object_or_404(FCMDevice, device_id=request.data["device_id"])
-        device.delete()
+        try:
+            device = FCMDevice.objects.get(device_id=request.data["device_id"])
+            device.delete()
+        except FCMDevice.DoesNotExist:
+            pass
 
         # Delete the token
         token = get_object_or_404(Token, user=request.user)

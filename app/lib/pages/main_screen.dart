@@ -6,7 +6,7 @@ import 'user_page.dart';
 import 'my_favorite_page.dart';
 import 'constants.dart';
 
-import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/apis/apis.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -26,12 +26,13 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> _loadUserData() async {
-    bool isLogged = await Auth.checkToken();
+    APIs apis = APIs();
+    bool isLogged = await apis.auth.checkToken();
     if (!isLogged) {
       Navigator.pushReplacementNamed(context, '/');
     }
     setState(() {
-      username = Auth.getUsername()!;
+      username = apis.auth.getUsername()!;
     });
   }
 

@@ -6,7 +6,7 @@ import 'components/custom_button.dart';
 import 'constants.dart';
 import 'main_screen.dart';
 
-import 'package:namer_app/api/auth.dart';
+import 'package:namer_app/apis/apis.dart';
 
 class SignupPage extends StatefulWidget {
   @override
@@ -41,8 +41,7 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
-      print("$username, $email, $password");
-      await Auth.signup(username, email, password);
+      APIs().signup(username, email, password);
     } catch (e) {
       _showDialog('Error', 'Failed to sign up. Please try again.');
     }

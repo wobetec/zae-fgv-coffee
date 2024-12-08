@@ -1,11 +1,11 @@
-// lib/pages/admin_profile_page.dart
-
 import 'package:flutter/material.dart';
-import 'reports_page.dart';
-import 'login_page.dart';
-import 'constants.dart';
-import 'package:namer_app/api/auth.dart';
+
 import 'components/user_info_card.dart';
+import 'constants.dart';
+import 'reports_page.dart';
+import 'home_page.dart';
+
+import 'package:namer_app/apis/apis.dart';
 
 class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({Key? key}) : super(key: key);
@@ -24,8 +24,9 @@ class _AdminProfilePageState extends State<AdminProfilePage> {
   }
 
   Future<void> _loadPageDetail() async {
+    APIs apis = APIs();
     setState(() {
-      supportName = Auth.getUsername()!;
+      supportName = apis.auth.getUsername()!;
     });
   }
 
@@ -133,6 +134,7 @@ class ProfileCard extends StatelessWidget {
 // Componente para a lista de opções
 class OptionList extends StatelessWidget {
   const OptionList({Key? key}) : super(key: key);
+  
 
   @override
   Widget build(BuildContext context) {
@@ -152,11 +154,17 @@ class OptionList extends StatelessWidget {
         OptionListTile(
           leading: Icon(Icons.logout, color: textColor),
           title: 'Sign Out',
-          onTap: () {
-            // Lógica para sair da conta e retornar à tela de login
+          onTap: () async {
+            try {
+              APIs().logout();
+            } catch (e) {
+              print('Failed to logout. Please try again.');
+              return;
+            }
+
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
+              MaterialPageRoute(builder: (context) => HomePage()),
               (route) => false,
             );
           },

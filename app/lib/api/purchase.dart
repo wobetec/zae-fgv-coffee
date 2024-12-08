@@ -5,9 +5,18 @@ import 'endpoints/endpoint_purchase.dart';
 
 
 class Purchase {
-  static EndPointPurchase? _endPointPurchase;
+  EndPointPurchase? _endPointPurchase;
+  Auth _auth = Auth();
 
-  static initialize(EndPointPurchase? endPointPurchase, {bool force = false}) {
+  Purchase._privateConstructor();
+
+  static final Purchase _instance = Purchase._privateConstructor();
+
+  factory Purchase() {
+    return _instance;
+  }
+
+  initialize(EndPointPurchase? endPointPurchase, {bool force = false}) {
     if (_endPointPurchase == null || force) {
       _endPointPurchase = endPointPurchase;
     } else {
@@ -15,11 +24,11 @@ class Purchase {
     }
   }
 
-  static Future<dynamic> purchase(String vmId, List<Map<String, dynamic>> products) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> purchase(String vmId, List<dynamic> products) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointPurchase!.purchase(Auth.getToken()!, vmId, products)
+    return await _endPointPurchase!.purchase(_auth.getToken()!, vmId, products)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to purchase');

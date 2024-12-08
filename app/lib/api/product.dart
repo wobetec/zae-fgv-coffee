@@ -4,9 +4,18 @@ import 'dart:convert';
 import 'endpoints/endpoint_product.dart';
 
 class Product {
-  static EndPointProduct? _endPointProduct;
+  EndPointProduct? _endPointProduct;
+  Auth _auth = Auth();
 
-  static initialize(EndPointProduct? endPointProduct, {bool force = false}) {
+  Product._privateConstructor();
+
+  static final Product _instance = Product._privateConstructor();
+
+  factory Product() {
+    return _instance;
+  }
+
+  initialize(EndPointProduct? endPointProduct, {bool force = false}) {
     if (_endPointProduct == null || force) {
       _endPointProduct = endPointProduct;
     } else {
@@ -14,11 +23,11 @@ class Product {
     }
   }
 
-  static Future<dynamic> getProduct(String productId) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getProduct(String productId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointProduct!.getProduct(Auth.getToken()!, productId)
+    return await _endPointProduct!.getProduct(_auth.getToken()!, productId)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get product');
@@ -30,11 +39,11 @@ class Product {
       });
   }
 
-  static Future<dynamic> getProducts({String? vmId}) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getProducts({String? vmId}) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointProduct!.getProducts(Auth.getToken()!, vmId: vmId)
+    return await _endPointProduct!.getProducts(_auth.getToken()!, vmId: vmId)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get products');
@@ -46,11 +55,11 @@ class Product {
       });
   }
 
-  static Future<dynamic> getFavoriteProducts() async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getFavoriteProducts() async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointProduct!.getFavoriteProducts(Auth.getToken()!)
+    return await _endPointProduct!.getFavoriteProducts(_auth.getToken()!)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get favorite products');
@@ -62,11 +71,11 @@ class Product {
       });
   }
 
-  static Future<dynamic> addFavoriteProduct(String productId, String vmId) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> addFavoriteProduct(String productId, String vmId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointProduct!.addFavoriteProduct(Auth.getToken()!, productId, vmId)
+    return await _endPointProduct!.addFavoriteProduct(_auth.getToken()!, productId, vmId)
       .then((response) {
         if (response.statusCode != 201) {
           throw Exception('Failed to add favorite product');
@@ -78,11 +87,11 @@ class Product {
       });
   }
 
-  static Future<void> removeFavoriteProduct(String productId, String vmId) async {
-    if (!Auth.hasToken()) {
+  Future<void> removeFavoriteProduct(String productId, String vmId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    await _endPointProduct!.removeFavoriteProduct(Auth.getToken()!, productId, vmId)
+    await _endPointProduct!.removeFavoriteProduct(_auth.getToken()!, productId, vmId)
       .then((response) {
         if (response.statusCode != 204) {
           throw Exception('Failed to remove favorite product');
@@ -93,11 +102,11 @@ class Product {
       });
   }
 
-  static Future<dynamic> getRatings(String productId) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getRatings(String productId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointProduct!.getRatings(Auth.getToken()!, productId)
+    return await _endPointProduct!.getRatings(_auth.getToken()!, productId)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get ratings');

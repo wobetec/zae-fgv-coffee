@@ -5,9 +5,18 @@ import 'endpoints/endpoint_order.dart';
 
 
 class Order {
-  static EndPointOrder? _endPointOrder;
+  EndPointOrder? _endPointOrder;
+  Auth _auth = Auth();
 
-  static initialize(EndPointOrder? endPointOrder, {bool force = false}) {
+  Order._privateConstructor();
+
+  static final Order _instance = Order._privateConstructor();
+
+  factory Order() {
+    return _instance;
+  }
+
+  initialize(EndPointOrder? endPointOrder, {bool force = false}) {
     if (_endPointOrder == null || force) {
       _endPointOrder = endPointOrder;
     } else {
@@ -15,11 +24,11 @@ class Order {
     }
   }
 
-  static Future<dynamic> getOrders() async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getOrders() async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointOrder!.getOrders(Auth.getToken()!)
+    return await _endPointOrder!.getOrders(_auth.getToken()!)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get orders');
@@ -32,11 +41,11 @@ class Order {
     
   }
 
-  static Future<dynamic> getOrder(String orderId) async {
-    if (!Auth.hasToken()) {
+  Future<dynamic> getOrder(String orderId) async {
+    if (!_auth.hasToken()) {
       throw Exception('No token');
     }
-    return await _endPointOrder!.getOrder(Auth.getToken()!, orderId)
+    return await _endPointOrder!.getOrder(_auth.getToken()!, orderId)
       .then((response) {
         if (response.statusCode != 200) {
           throw Exception('Failed to get order');

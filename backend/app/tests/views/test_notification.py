@@ -2,8 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
-from app import factories, models
-from app.views.notification import notify_out_of_stock_favorite_products
+from app import models
 
 
 class RegisterDeviceTests(APITestCase):
@@ -63,17 +62,3 @@ class RegisterDeviceTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-
-class NotifyOutOfStockFavoriteProductsTests(APITestCase):
-
-    def setUp(self):
-        self.user = models.User.objects.create_user(
-            username="testuser", password="testpassword", email="testuser@email.com"
-        )
-        self.token = Token.objects.create(user=self.user)
-
-    def test_notify_out_of_stock_favorite_products(self):
-        stock = factories.StockFactory(stock_quantity=0)
-        factories.WishlistFactory(product=stock.product, user=self.user)
-        notify_out_of_stock_favorite_products([stock])

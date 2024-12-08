@@ -15,19 +15,15 @@ import 'pages/loading_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:namer_app/api/api.dart';
-import 'package:namer_app/fcm/fcm.dart';
 import 'package:namer_app/api/auth.dart';
-
+import 'package:namer_app/apis/apis.dart';
 
 Future<void> main() async {
   // Load environment variables from the .env file
   await dotenv.load(fileName: path.join('.env'));
 
   WidgetsFlutterBinding.ensureInitialized();
-
-  await FCM.initialize();
-  await BackendApi.initialize();
+  APIs().initialize();
 
   runApp(MyApp());
 }
@@ -37,11 +33,13 @@ class MyApp extends StatelessWidget {
 
   // Method to check login status and user type
   Future<UserType?> _checkLoginStatus() async {
-    bool isLogged = await Auth.checkToken();
+    Auth auth = Auth();
+    bool isLogged = await auth.checkToken();
+    print('isLogged: $isLogged');
     if (!isLogged) {
       return null;
     }
-    return Auth.getUserType();
+    return auth.getUserType();
   }
 
   @override

@@ -1,16 +1,13 @@
 // lib/pages/login_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:namer_app/apis/apis.dart';
 import 'components/custom_input_field.dart';
 import 'components/custom_button.dart';
 import 'components/user_admin_switch.dart';
 import 'constants.dart';
 import 'main_screen.dart';
-import 'admin_profile_page.dart'; // Importamos a página de perfil do admin
-
-import 'package:namer_app/api/auth.dart';
-import 'package:namer_app/api/notification.dart' as my_notification;
-import 'package:namer_app/fcm/fcm.dart';
+import 'admin_profile_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -42,17 +39,9 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
-      await Auth.login(
-        username, 
-        password, 
-        isAdmin ? UserType.support : UserType.user
-      );
-      await my_notification.Notification.registerDevice(
-        FCM.registrationId!,
-        FCM.deviceType!,
-        FCM.deviceId!,
-      );
+      APIs().login(username, password, isAdmin);
     } catch (e) {
+      print('Error: $e');
       _showDialog('Error', 'Failed to sign in. Please try again.');
       setState(() {
         _isLoading = false;
@@ -60,7 +49,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    // Se isAdmin == true, vai para AdminProfilePage. Caso contrário, vai para MainScreen.
     if (isAdmin) {
       Navigator.pushReplacement(
         context,
@@ -76,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = false;
     });
+
   }
 
   void _showDialog(String title, String message, {VoidCallback? onOk}) {
